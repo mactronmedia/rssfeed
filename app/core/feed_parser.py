@@ -8,8 +8,11 @@ from urllib.parse import urlparse
 class FeedParser:
     @staticmethod
     async def fetch_feed(url: str) -> Dict:
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
         async with aiohttp.ClientSession() as session:
-            async with session.get(url) as response:
+            async with session.get(url, headers=headers) as response:
                 feed_content = await response.text()
                 return feedparser.parse(feed_content)
 
