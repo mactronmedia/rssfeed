@@ -39,3 +39,7 @@ inoreader_clone/
 │   │   ├── base.html                # Base layout HTML (for shared structure)
 │   │   ├── add_feed.html            # Web form to submit a new RSS feed URL
 │   │   └── feed_items.html          # Display feed items visually in browser (for dev/debug)
+
+
+
+Template: https://chatgpt.com/c/67f69996-6188-800c-8368-5726a4459c36

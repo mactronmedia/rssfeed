@@ -16,18 +16,15 @@ async def list_feeds(request: Request):
     feeds = await FeedService.get_all_feeds()
     if not feeds:
         raise HTTPException(status_code=404, detail="No feeds found.")
-    
     return templates.TemplateResponse("list_feeds.html", {"request": request, "feeds": feeds})
 
 
 @router.get("/feed/{feed_id}", response_class=HTMLResponse)
 async def get_feed_by_id(request: Request, feed_id: str):
     # Fetch the feed by ID using the service method
+    # http://localhost:8000/web/feed/67f63d499efb47e5229f196e
+
     feed = await FeedService.get_feed_by_id(feed_id)
-    
     if not feed:
-        # If no feed is found, return a 404 error
         raise HTTPException(status_code=404, detail="Feed not found")
-    
-    # Return the feed data as an HTML page
     return templates.TemplateResponse("feed_detail.html", {"request": request, "feed": feed})
