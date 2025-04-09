@@ -1,3 +1,4 @@
+import re
 import aiohttp
 import feedparser
 from datetime import datetime
@@ -36,13 +37,23 @@ class FeedParser:
                 pub_date = datetime(*pub_date[:6]).isoformat()
             else:
                 pub_date = datetime.utcnow().isoformat()
-            
+
+            # Get media thumbnail if available
+            media_thumbnail = entry.get("media_thumbnail", [{}])[0].get("url", "") if "media_thumbnail" in entry else ""
+
+            # Fallback: try to extract image from description if thumbnail is missing
+            if not media_thumbnail:
+                description = entry.get("description", "")
+                match = re.search(r'<img[^>]+src="([^">]+)"', description)
+                if match:
+                    media_thumbnail = match.group(1)
+
             items.append({
                 "title": entry.get("title", ""),
                 "description": entry.get("description", ""),
                 "link": entry.get("link", ""),
-                "pubDate": pub_date,  # Now stored as ISO format string
-                "media_thumbnail": entry.get("media_thumbnail", [{}])[0].get("url", "") if "media_thumbnail" in entry else "",
+                "pubDate": pub_date,
+                "media_thumbnail": media_thumbnail,
                 "feed_url": feed_url,
                 "full_content": "",
                 "is_full_content_fetched": False
