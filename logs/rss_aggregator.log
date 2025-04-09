@@ -111,3 +111,4 @@
 2025-04-09 07:17:17,745 - rss_aggregator - INFO - GET /api/v1/api/v1/feeds/search/ completed with 404 in 0.0023s - [logger.py:106]
 2025-04-09 07:17:22,559 - rss_aggregator - INFO - GET /api/v1/api/v1/feeds/search/ completed with 404 in 0.0015s - [logger.py:106]
 2025-04-09 07:18:01,576 - rss_aggregator - INFO - GET /api/v1/api/v1/feeds/search/ completed with 404 in 0.0023s - [logger.py:106]
+2025-04-09 07:18:09,347 - rss_aggregator - INFO - GET /api/v1/api/v1/feeds/search/ completed with 200 in 0.0540s - [logger.py:106]
