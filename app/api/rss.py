@@ -29,8 +29,7 @@ async def list_feeds():
 @router.get("/feeds/items/", response_model=list[FeedNewsItem], tags=["News Items"])
 async def get_feed_items(
     feed_url: str = Query(..., description="URL of the RSS feed"),
-    limit: int = Query(20, ge=1, le=100, description="Number of news items (default 20, max 100)")
-):
+    limit: int = Query(20, ge=1, le=100, description="Number of news items (default 20, max 100)")):
     """
     Returns news items from the specified RSS feed.
     """
