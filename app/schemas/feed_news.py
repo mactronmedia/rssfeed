@@ -6,17 +6,20 @@ class FeedNewsCreate(BaseModel):
     feed_url: str
 
 class FeedNewsItem(BaseModel):
-    id: str = Field(alias="_id")
+    id: str
     title: str
     description: str
     link: str
-    pubDate: datetime
-    media_thumbnail: str
+    pubDate: str
     feed_url: str
     full_content: Optional[str] = None
-    is_full_content_fetched: bool
+    is_full_content_fetched: bool = False
 
-    model_config = {
-        "from_attributes": True,
-        "populate_by_name": True
-    }
+    @classmethod
+    def from_mongo(cls, item: dict) -> "FeedNewsItem":
+        """
+        Converts a MongoDB document into a FeedNewsItem instance.
+        """
+        # MongoDB's _id field is an ObjectId, we convert it to string
+        item["id"] = str(item["_id"])  # Convert MongoDB ObjectId to string
+        return cls(**item)  # Create an instance of FeedNewsItem using the document data
