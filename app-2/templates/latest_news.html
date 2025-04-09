@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Latest News{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <h1 class="text-3xl font-bold mb-6">Latest News</h1>
+    
+    <div class="space-y-4">
+        {% for item in items %}
+        <div class="bg-dark-800 rounded-lg p-6 hover:bg-dark-700 transition-colors duration-200">
+            <div class="flex items-center space-x-4 mb-3">
+                {% if item.feed_image %}
+                <img src="{{ item.feed_image }}" alt="{{ item.feed_title }}" class="w-8 h-8 rounded-full">
+                {% endif %}
+                <span class="text-dark-400">{{ item.feed_title }}</span>
+            </div>
+            
+            <div class="flex flex-col md:flex-row gap-6">
+                {% if item.media_thumbnail %}
+                <div class="md:w-1/4">
+                    <img src="{{ item.media_thumbnail }}" alt="{{ item.title }}" 
+                         class="w-full h-auto rounded-lg">
+                </div>
+                {% endif %}
+                <div class="md:flex-1">
+                    <h2 class="text-xl font-bold mb-2">
+                        <a href="{{ item.link }}" target="_blank" class="hover:text-blue-400">
+                            {{ item.title }}
+                        </a>
+                    </h2>
+                    <p class="text-dark-300 mb-3">{{ item.description|safe }}</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-dark-400">
+                            {{ item.pubDate.strftime('%Y-%m-%d %H:%M') }}
+                        </span>
+                        <a href="/article/{{ item.id }}" 
+                           class="text-blue-400 hover:text-blue-300 font-medium">
+                            Read More
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

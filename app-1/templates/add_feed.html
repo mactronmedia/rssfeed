@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Add RSS Feed{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h2 class="mb-4">Add New RSS Feed</h2>
+        
+        {% if error %}
+        <div class="alert alert-warning">
+            {{ error }}
+            {% if existing_feed %}
+            <p>You can <a href="/feeds/{{ existing_feed.id }}/items">view this feed</a>.</p>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <form action="/feeds/add" method="post">
+            <div class="mb-3">
+                <label for="url" class="form-label">Feed URL</label>
+                <input type="url" class="form-control" id="url" name="url" 
+                       placeholder="https://example.com/feed.rss" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Feed</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

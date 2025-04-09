@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles */
+.prose {
+    max-width: 65ch;
+}
+
+.prose-invert {
+    @apply text-gray-300;
+}
+
+.prose-invert a {
+    @apply text-primary-400 hover:text-primary-300;
+}
+
+.prose-invert img {
+    @apply rounded-lg;
+}

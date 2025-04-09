@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}{{ article.title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>{{ article.title }}</h2>
+    <a href="/feeds/{{ feed.id }}/items" class="btn btn-outline-primary">Back to Feed</a>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="d-flex justify-content-between mb-3">
+            <small class="text-muted">Published: {{ article.pub_date|datetimeformat if article.pub_date else 'Unknown' }}</small>
+            <a href="{{ article.link }}" target="_blank" class="btn btn-sm btn-outline-secondary">View Original</a>
+        </div>
+        
+        {% if article.media_thumbnail %}
+        <img src="{{ article.media_thumbnail }}" class="img-fluid rounded mb-3" alt="Article thumbnail">
+        {% endif %}
+        
+        <div class="article-content">
+            {% if article.full_content %}
+                {{ article.full_content|safe }}
+            {% else %}
+                <p>{{ article.description|safe }}</p>
+                <div class="alert alert-info mt-3">
+                    <p>Full content not fetched yet. <a href="#" hx-get="/api/v1/news/{{ article.id }}/full" hx-target=".article-content" hx-swap="innerHTML">Click here to load full content</a>.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/htmx.org@1.9.2"></script>
+{% endblock %}

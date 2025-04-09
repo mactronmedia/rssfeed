@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}{{ feed.title }} Items{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center space-x-4 mb-6">
+        {% if feed.image %}
+        <img src="{{ feed.image }}" alt="{{ feed.title }}" class="w-16 h-16 rounded-full">
+        {% endif %}
+        <div>
+            <h1 class="text-3xl font-bold">{{ feed.title }}</h1>
+            <p class="text-dark-400">{{ feed.domain }}</p>
+        </div>
+    </div>
+
+    <div class="space-y-4">
+        {% for item in items %}
+        <div class="bg-dark-800 rounded-lg p-6 hover:bg-dark-700 transition-colors duration-200">
+            <div class="flex flex-col md:flex-row gap-6">
+                {% if item.media_thumbnail %}
+                <div class="md:w-1/4">
+                    <img src="{{ item.media_thumbnail }}" alt="{{ item.title }}" 
+                         class="w-full h-auto rounded-lg">
+                </div>
+                {% endif %}
+                <div class="md:flex-1">
+                    <h2 class="text-xl font-bold mb-2">
+                        <a href="{{ item.link }}" target="_blank" class="hover:text-blue-400">
+                            {{ item.title }}
+                        </a>
+                    </h2>
+                    <p class="text-dark-300 mb-3">{{ item.description|safe }}</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-dark-400">
+                            {{ item.pubDate.strftime('%Y-%m-%d %H:%M') }}
+                        </span>
+                        <a href="/article/{{ item.id }}" 
+                           class="text-blue-400 hover:text-blue-300 font-medium">
+                            Read More
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+<div class="p-3 hover:bg-gray-700 rounded-lg cursor-pointer transition-colors {% if feed.url == active_feed %}bg-gray-700{% endif %}"
+     hx-get="/web/feeds/{{ feed.id }}/news" 
+     hx-target="#news-container"
+     hx-swap="innerHTML">
+    <div class="flex items-center space-x-3">
+        {% if feed.image %}
+        <img src="{{ feed.image }}" alt="{{ feed.title }}" class="w-8 h-8 rounded-full">
+        {% endif %}
+        <div>
+            <h3 class="font-medium">{{ feed.title }}</h3>
+            <p class="text-xs text-gray-400">{{ feed.domain }}</p>
+        </div>
+    </div>
+</div>
