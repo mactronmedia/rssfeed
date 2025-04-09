@@ -47,10 +47,8 @@ class FeedService:
 
     @staticmethod
     async def get_all_feeds():
-        # Return all saved feed URLs
         return await FeedURLCRUD.get_all_feed_urls()
 
     @staticmethod
     async def get_feed_items(feed_url: str, limit: int = 20):
-        # Fetch news items for the given feed URL
         return await FeedNewsCRUD.get_news_items_by_feed_url(feed_url, limit)

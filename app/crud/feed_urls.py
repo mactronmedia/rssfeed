@@ -37,6 +37,12 @@ class FeedURLCRUD:
         return FeedURLOut.from_mongo(feed) if feed else None
 
     @staticmethod
+    async def search_feed_urls(query: dict) -> List[FeedURLOut]:
+        collection = get_feed_urls_collection()
+        feeds = await collection.find(query).to_list(None)
+        return [FeedURLOut.from_mongo(feed) for feed in feeds]
+        
+    @staticmethod
     async def normalize_url(url: str) -> str:
         """Normalize URL to prevent duplicates with different formats"""
         url = url.strip()
