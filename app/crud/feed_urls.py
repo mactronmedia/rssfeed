@@ -1,6 +1,7 @@
+from bson import ObjectId
 from typing import Optional, List
-from app.database.mongo_db import get_feed_urls_collection
 from app.schemas.feed_urls import FeedURLOut
+from app.database.mongo_db import get_feed_urls_collection
 
 class FeedURLCRUD:
     @staticmethod
@@ -34,6 +35,13 @@ class FeedURLCRUD:
         """Check if a feed from this domain already exists"""
         collection = get_feed_urls_collection()
         feed = await collection.find_one({"domain": domain})
+        return FeedURLOut.from_mongo(feed) if feed else None
+
+    @staticmethod
+    async def get_feed_url_by_id(feed_id: str) -> Optional[FeedURLOut]:
+        # http://localhost:8000/web/feed/67f63d499efb47e5229f196e
+        collection = get_feed_urls_collection()
+        feed = await collection.find_one({"_id": ObjectId(feed_id)})
         return FeedURLOut.from_mongo(feed) if feed else None
 
     @staticmethod

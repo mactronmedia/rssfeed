@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex flex-col lg:flex-row gap-6">
+    <!-- Left sidebar - Feed list -->
+    <div class="w-full lg:w-1/4">
+        {% include "components/add_feed.html" %}
+        {% include "components/feed_list.html" %}
+    </div>
+
+    <!-- Main content - News items -->
+    <div class="w-full lg:w-3/4">
+        <div class="mb-6">
+            <h2 class="text-xl font-semibold text-gray-100">Latest News</h2>
+        </div>
+
+        <div id="news-items-container" class="space-y-4">
+            {% for item in news_items %}
+                {% include "components/news_item.html" %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

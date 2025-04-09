@@ -40,16 +40,20 @@ class FeedService:
         
         # Get all existing links in one query
         existing_links = await FeedNewsCRUD.get_existing_links([item["link"] for item in feed_items])
-        
-        # Filter out existing items and prepare new items for bulk insert
         new_items = [item for item in feed_items if item["link"] not in existing_links]
         
-        # Bulk insert all new items at once
         if new_items:
             await FeedNewsCRUD.create_feed_news_items_bulk(new_items)
 
-        # Return the created feed metadata
         return await FeedURLCRUD.get_feed_url_by_url(normalized_url)
+
+    @staticmethod
+    async def get_feed_by_id(feed_id: str):
+        # Fetch feed data by its ID from the database
+        # http://localhost:8000/web/feed/67f63d499efb47e5229f196e
+        
+        feed = await FeedURLCRUD.get_feed_url_by_id(feed_id)
+        return feed
 
     @staticmethod
     async def get_all_feeds():
