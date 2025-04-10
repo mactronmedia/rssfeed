@@ -18,7 +18,7 @@ async def index(request: Request):
     try:
         feeds = await FeedService.get_all_feeds()
         latest_news = await FeedNewsCRUD.get_all_news(limit=50)  # show latest 30
-
+        print(latest_news)
         return templates.TemplateResponse("index.html", {"request": request, "feeds": feeds, "news": latest_news})
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -38,7 +38,7 @@ async def get_feed_by_id(request: Request, feed_id: str):
         
         # Fetch the news items for the feed
         items_with_feed = await FeedService.get_news_with_feed_info(feed.url)
-
+        print(items_with_feed)
         # Fetch all feeds to display in the sidebar
         feeds = await FeedService.get_all_feeds()
 

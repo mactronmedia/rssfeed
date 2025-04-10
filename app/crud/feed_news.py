@@ -71,6 +71,15 @@ class FeedNewsCRUD:
         results = await collection.aggregate(pipeline).to_list(None)
         return results  # This will include both news and feed metadata
 
+
+    @staticmethod
+    async def get_news_with_feed_info_by_feed_url(feed_url: str):
+        latest_news = get_feed_news_collection()
+        latest_news = latest_news.find({"feed_url": feed_url}).sort("pubDate", -1)
+        return await latest_news.to_list(length=None)
+
+
+    '''
     @staticmethod
     async def get_news_with_feed_info_by_feed_url(feed_url: str):
         collection = get_feed_news_collection()
@@ -88,3 +97,4 @@ class FeedNewsCRUD:
         ]
         results = await collection.aggregate(pipeline).to_list(None)
         return results
+    '''

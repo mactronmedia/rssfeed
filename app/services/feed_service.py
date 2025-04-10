@@ -45,6 +45,7 @@ class FeedService:
     async def update_feed_news_by_url(url: str) -> Optional[FeedURLOut]:
 
         normalized_url = await FeedURLCRUD.normalize_url(url)
+
         feed_data = await FeedParser.fetch_feed(normalized_url)
         if not feed_data or hasattr(feed_data, 'bozo_exception'):
             return None

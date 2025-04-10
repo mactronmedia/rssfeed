@@ -9,7 +9,7 @@ from app.schemas.feed_urls import FeedURLCreate, FeedURLOut
 from app.schemas.feed_news import FeedNewsItem
 
 # Define the router once here
-router = APIRouter(prefix="/api/v1", tags=["Feeds & News"])
+router = APIRouter(tags=["Feeds & News"])
 
 class FeedNewsAPI:
     def __init__(self):

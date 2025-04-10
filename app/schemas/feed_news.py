@@ -12,7 +12,7 @@ class FeedNewsItem(BaseModel):
     title: str
     description: str
     link: str
-    pubDate: str
+    pubDate: datetime
     feed_url: str
     media_thumbnail: Optional[str] = None  # Add this field for the thumbnail URL
     full_content: Optional[str] = None

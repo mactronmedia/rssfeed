@@ -3,17 +3,15 @@
 {% block content %}
     <div class="flex justify-between items-center mb-4">
         <h1 class="text-3xl font-semibold text-white">{{ feed.title }}</h1>
-        <a href="{{ feed.link }}" target="_blank" class="text-blue-400 hover:underline cursor-pointer">Visit Feed</a>
+            <!-- Update Feed Button -->
+        <div class="mb-4">
+            <button id="updateFeedButton" class="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600 transition text-sm">
+                Update Feed
+            </button>
+        </div>
     </div>
 
     <p class="text-lg text-gray-400 mb-4">{{ feed.description }}</p>
-
-    <!-- Update Feed Button -->
-    <div class="mb-4">
-        <button id="updateFeedButton" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition">
-            Update Feed
-        </button>
-    </div>
 
     <!-- News Grid for the Feed -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
@@ -33,7 +31,6 @@
 
                             {{ feed.url }}
                             {{ feed.link }}
-
                         </p>
                     </div>
                 </a>
@@ -44,7 +41,7 @@
     <script>
         document.getElementById('updateFeedButton').addEventListener('click', function() {
             const feedUrl = "{{ feed.url }}"; // Ensure you pass the correct feed URL here
-            const apiUrl = `http://localhost:8000/api/v1/api/v1/feeds/update/?url=${feedUrl}`;
+            const apiUrl = `http://localhost:8000/api/v1/feeds/update/?url=${feedUrl}`;
             // http://localhost:8000/api/v1/api/v1/feeds/update/?url=https://img.rtvslo.si/feeds/00.xml
             console.log('Making API call to:', apiUrl); // Debugging log to check the URL
             
