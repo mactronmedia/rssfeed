@@ -5,24 +5,22 @@
     <title>{{ feed.title }}</title>
 </head>
 <body>
-    <h1>{{ feed.title }}</h1>
-    <p>{{ feed.description }}</p>
-    <img src="{{ feed.image }}" alt="{{ feed.title }} logo" />
-
-    <h2>Articles</h2>
+ 
+    <h2>{{ items[0].feed_info.title }}</h2>  <!-- Access feed_info from the first item -->
+    <img src="{{ items[0].feed_info.image }}" alt="Feed Image">
+    
     <ul>
-        {% for item in items %}
+    {% for item in items %}
         <li>
             <a href="{{ item.link }}">{{ item.title }}</a><br>
-            <img src="{{ item.media_thumbnail }}" alt="thumbnail" width="100"/><br>
-            <small>{{ item.pubDate }}</small><br>
-            <p>{{ item.description | safe }}</p>
+            <img src="{{ item.media_thumbnail }}" width="200"><br>
+            {{ item.description | safe }}
         </li>
-        {% else %}
-        <p>No articles found for this feed.</p>
-        {% endfor %}
+    {% endfor %}
     </ul>
-
+    
+    
+    
     <a href="/feeds">Back to feeds list</a>
 </body>
 </html>

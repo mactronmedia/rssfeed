@@ -57,6 +57,10 @@ class FeedService:
         return feed
 
     @staticmethod
+    async def get_news_with_feed_info(feed_url: str):
+        return await FeedNewsCRUD.get_news_with_feed_info_by_feed_url(feed_url)
+        
+    @staticmethod
     async def get_feed_with_items_by_id(feed_id: str):
         # Join both collection and read metadata of feed_urls and
         # latest news of feed_news

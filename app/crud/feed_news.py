@@ -45,3 +45,25 @@ class FeedNewsCRUD:
         collection = get_feed_news_collection()
         result = await collection.insert_many(news_items)
         return result.inserted_ids
+
+    @staticmethod
+    async def get_news_with_feed_info_by_feed_url(feed_url: str):
+        collection = get_feed_news_collection()
+
+        # Now, use the feed_url directly instead of undefined target_url
+        pipeline = [
+            {"$match": {"feed_url": feed_url}},  # Use feed_url here
+            {
+                "$lookup": {
+                    "from": "feed_urls",
+                    "localField": "feed_url",
+                    "foreignField": "url",
+                    "as": "feed_info"
+                }
+            },
+            {"$unwind": "$feed_info"}
+        ]
+
+        # Execute the aggregation pipeline
+        results = await collection.aggregate(pipeline).to_list(None)
+        return results

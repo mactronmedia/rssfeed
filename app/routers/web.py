@@ -32,12 +32,13 @@ async def get_feed_by_id(request: Request, feed_id: str):
 
 @router.get("/feed/{feed_id}", response_class=HTMLResponse)
 async def get_feed_by_id(request: Request, feed_id: str):
-    feed, items = await FeedService.get_feed_with_items_by_id(feed_id)
+    feed = await FeedService.get_feed_by_id(feed_id)
     if not feed:
-        return templates.TemplateResponse("not_found.html", {"request": request})
+        raise HTTPException(status_code=404, detail="Feed not found")
     
+    items_with_feed = await FeedService.get_news_with_feed_info(feed.url)
     return templates.TemplateResponse("feed_detail.html", {
         "request": request,
         "feed": feed,
-        "items": items
+        "items": items_with_feed
     })
