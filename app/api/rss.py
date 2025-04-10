@@ -21,9 +21,9 @@ class FeedNewsAPI:
         router.add_api_route("/feeds/items/", FeedNewsAPI.get_feed_items, methods=["GET"], response_model=list[FeedNewsItem], tags=["News Items"])
         router.add_api_route("/articles/", FeedNewsAPI.get_full_article, methods=["GET"], response_model=FeedNewsItem, tags=["Articles"])
         router.add_api_route("/feeds/search/", FeedNewsAPI.search_feed_urls, methods=["GET"], response_model=list[FeedURLOut], tags=["Feeds"])
-        router.add_api_route("/feeds/with-items/", FeedNewsAPI.add_and_fetch_items, methods=["GET"], response_model=dict, tags=["Feeds"]
+        router.add_api_route("/feeds/with-items/", FeedNewsAPI.add_and_fetch_items, methods=["GET"], response_model=dict, tags=["Feeds"])
+        router.add_api_route("/feeds/update/", FeedNewsAPI.update_feed_by_url, methods=["GET"], response_model=FeedURLOut, tags=["Feeds"])
 
-    )
 
     '''
    @staticmethod
@@ -119,6 +119,23 @@ class FeedNewsAPI:
         if not article:
             raise HTTPException(status_code=404, detail="Article not found.")
         return article
+
+    @staticmethod
+    async def update_feed_by_url(url: str):
+        """
+        Update the news items for a specific feed by URL.
+        """
+        feed_service = FeedService()
+        
+        # Update the feed
+        updated_feed = await feed_service.update_feed_news_by_url(url)
+        if not updated_feed:
+            raise HTTPException(
+                status_code=400,
+                detail="Failed to update feed news from URL."
+            )
+
+        return updated_feed
 
     @staticmethod
     async def search_feed_urls(

@@ -49,6 +49,33 @@ class FeedService:
 
         return await FeedURLCRUD.get_feed_url_by_url(normalized_url)
 
+
+    @staticmethod
+    async def update_feed_news_by_url(url: str) -> Optional[FeedURLOut]:
+        normalized_url = await FeedURLCRUD.normalize_url(url)
+
+        feed_data = await FeedParser.fetch_feed(normalized_url)
+        if not feed_data or hasattr(feed_data, 'bozo_exception'):
+            return None
+
+        feed_metadata = FeedParser.parse_feed_metadata(feed_data)
+        feed_metadata["url"] = normalized_url
+        feed_metadata["domain"] = urlparse(normalized_url).netloc
+
+        await FeedURLCRUD.update_feed_url(normalized_url, feed_metadata)
+
+        feed_items = FeedParser.parse_feed_items(feed_data, normalized_url)
+
+        existing_links = await FeedNewsCRUD.get_existing_links([item["link"] for item in feed_items])
+
+        new_items = [item for item in feed_items if item["link"] not in existing_links]
+
+        if new_items:
+            await FeedNewsCRUD.create_feed_news_items_bulk(new_items)
+
+        return await FeedURLCRUD.get_feed_url_by_url(normalized_url)
+
+
     @staticmethod
     async def get_feed_by_id(feed_id: str):
         # Fetch feed data by its ID from the database
@@ -78,3 +105,4 @@ class FeedService:
     @staticmethod
     async def get_feed_items(feed_url: str, limit: int = 20):
         return await FeedNewsCRUD.get_news_items_by_feed_url(feed_url, limit)
+
