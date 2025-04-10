@@ -17,7 +17,7 @@ async def index(request: Request):
     """
     try:
         feeds = await FeedService.get_all_feeds()
-        latest_news = await FeedNewsCRUD.get_all_news(limit=300)  # show latest 30
+        latest_news = await FeedNewsCRUD.get_all_news(limit=50)  # show latest 30
 
         return templates.TemplateResponse("index.html", {"request": request, "feeds": feeds, "news": latest_news})
     except Exception as e:

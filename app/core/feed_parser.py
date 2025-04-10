@@ -88,20 +88,11 @@ class FeedParser:
 
     @staticmethod
     def clean_html(content: str) -> str:
-        # Remove all tags except <p> (paragraphs) and convert them to plain text
-        cleaned = re.sub(r'<(?!p\s*[^>]*>)([^>]+)>', '', content)  # Use 'content' here
-        
-        # Convert <p> tags into newline characters to preserve paragraph structure
-        cleaned = re.sub(r'<p\s*[^>]*>', '\n', cleaned)  # Replace <p> with newline
-        cleaned = re.sub(r'</p>', '\n', cleaned)  # Replace </p> with newline
-        
-        # Remove unwanted script, iframe, and other potentially harmful elements
+        cleaned = re.sub(r'<(?!p\s*[^>]*>)([^>]+)>', '', content)
+        cleaned = re.sub(r'<p\s*[^>]*>', '\n', cleaned)
+        cleaned = re.sub(r'</p>', '\n', cleaned)
         cleaned = re.sub(r'<(script|iframe)[^>]*>.*?</\1>', '', cleaned, flags=re.DOTALL)
-        
-        # Remove any remaining tags (e.g., <a>, <img>, <br>, etc.)
         cleaned = re.sub(r'<[^>]+>', '', cleaned)
-        
-        # Optionally, trim excessive spaces or newlines
         cleaned = re.sub(r'\n+', '\n', cleaned).strip()
         
         return cleaned
