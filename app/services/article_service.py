@@ -1,3 +1,5 @@
+# services/article_service.py
+
 from typing import Optional
 from app.core.article_parser import ArticleParser
 from app.crud.feed_news import FeedNewsCRUD

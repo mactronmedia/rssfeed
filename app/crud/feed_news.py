@@ -1,3 +1,5 @@
+# crud/feed_news.py
+
 from typing import List, Optional
 from app.database.mongo_db import get_feed_news_collection
 from app.schemas.feed_news import FeedNewsItem
