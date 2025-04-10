@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Audio Player</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Base styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding-bottom: 80px; /* Space for fixed player */
+        }
+        
+        /* Audio player container */
+        .audio-player {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        /* Album art */
+        .album-art {
+            width: 50px;
+            height: 50px;
+            border-radius: 4px;
+            margin-right: 15px;
+            background-color: #555;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+        
+        .album-art img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        /* Track info */
+        .track-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .track-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .track-artist {
+            font-size: 12px;
+            opacity: 0.8;
+            margin: 3px 0 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* Controls */
+        .player-controls {
+            display: flex;
+            align-items: center;
+            margin: 0 20px;
+        }
+        
+        .control-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 0 10px;
+            opacity: 0.8;
+            transition: all 0.2s;
+        }
+        
+        .control-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        
+        .play-btn {
+            font-size: 24px;
+        }
+        
+        /* Progress bar */
+        .progress-container {
+            flex: 2;
+            max-width: 500px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .progress-bar {
+            flex: 1;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            margin: 0 10px;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .progress {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 0%;
+            background: #1abc9c;
+            border-radius: 2px;
+        }
+        
+        .time {
+            font-size: 12px;
+            opacity: 0.7;
+            min-width: 40px;
+            text-align: center;
+        }
+        
+        /* Volume and other controls */
+        .extra-controls {
+            display: flex;
+            align-items: center;
+            margin-left: 20px;
+        }
+        
+        .volume-container {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
+        
+        .volume-bar {
+            width: 80px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            margin-left: 8px;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .volume-progress {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 80%;
+            background: #1abc9c;
+            border-radius: 2px;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .progress-container {
+                display: none;
+            }
+            
+            .extra-controls {
+                display: none;
+            }
+        }
+
+        /* Animation */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .play-btn.playing {
+            animation: pulse 2s infinite;
+        }
+
+        .album-art:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Your website content here -->
+    <div style="padding: 20px;">
+        <h1>Website Content</h1>
+        <p>Scroll down to see the fixed audio player at the bottom.</p>
+        <div style="height: 1000px;"></div>
+    </div>
+    
+    <!-- Audio Player -->
+    <div class="audio-player">
+        <div class="album-art">
+            <img src="https://images.libsyn.com/p/assets/b/3/1/9/b319997d6a63e94f5f2e77a3093c12a1/Podcast_Paul_Dermody.jpg?h=90&w=90&auto=compress" alt="Album Art">
+        </div>
+        
+        <div class="track-info">
+            <h3 class="track-title">The Paul Dermody Podcast</h3>
+            <p class="track-artist"># 205 When One Partner Changes and the Other Doesn’t</p>
+        </div>
+        
+        <div class="player-controls">
+            <button class="control-btn"><i class="fas fa-step-backward"></i></button>
+            <button class="control-btn play-btn"><i class="fas fa-play"></i></button>
+            <button class="control-btn"><i class="fas fa-step-forward"></i></button>
+        </div>
+        
+        <div class="progress-container">
+            <span class="time current">0:00</span>
+            <div class="progress-bar" id="progressBar">
+                <div class="progress"></div>
+            </div>
+            <span class="time duration">0:00</span>
+        </div>
+        
+        <div class="extra-controls">
+            <div class="volume-container">
+                <button class="control-btn" id="volumeBtn"><i class="fas fa-volume-up"></i></button>
+                <div class="volume-bar" id="volumeBar">
+                    <div class="volume-progress"></div>
+                </div>
+            </div>
+            <button class="control-btn"><i class="fas fa-ellipsis-h"></i></button>
+        </div>
+    </div>
+    
+    <script>
+        const audio = new Audio('https://content.libsyn.com/p/7/1/1/71186c40a163a24d/gVSpr.mp3?c_id=185921940&cs_id=185921940&destination_id=499832&response-content-type=audio%2Fmpeg&Expires=1744323274&Signature=cCVj2bxwkg6t9pRDyFv7hXN7d3HU3RMrwFfaZhBlD3zt-gfoyCnTVYdncNnjBgQJy64acoap0IgUjDWHYW88hbl8R4C~yecfzi1NyIDRWiY4gwjsnN9VMVs8SKfvSxjoZtJZqU~-ORlbI6LRdglgrKIr5k2HPZv8NUA7eoRD60T8BvPG5HjiH3JKnuJ48niqGe81A7r9K4t-iOaz9QfkT9NovQ7QxSbyXDIqvDmmL-qOEiqTeqcxj8tuixrvn4pYMKDH7Q7yOFNXnDxJKP-7QRz-mPojN1OLNu634Jo4KEZy1uPV8XPemqYJPFlBuPP~uUNr9r60ALmhoywjxFXtng__&Key-Pair-Id=K1YS7LZGUP96OI');
+        const playBtn = document.querySelector('.play-btn');
+        const progressBar = document.getElementById('progressBar');
+        const progress = document.querySelector('.progress');
+        const currentTimeEl = document.querySelector('.time.current');
+        const durationEl = document.querySelector('.time.duration');
+        const volumeBtn = document.getElementById('volumeBtn');
+        const volumeBar = document.getElementById('volumeBar');
+        const volumeProgress = document.querySelector('.volume-progress');
+        
+        let isPlaying = false;
+        
+        // Set initial volume
+        audio.volume = 0.8;
+        
+        // When metadata is loaded, set the duration
+        audio.addEventListener('loadedmetadata', function() {
+            durationEl.textContent = formatTime(audio.duration);
+        });
+        
+        // Play/Pause functionality
+        playBtn.addEventListener('click', function() {
+            isPlaying = !isPlaying;
+            playBtn.innerHTML = isPlaying ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
+            isPlaying ? audio.play() : audio.pause();
+            
+            if(isPlaying) playBtn.classList.add('playing');
+            else playBtn.classList.remove('playing');
+        });
+        
+        // Update progress bar as audio plays
+        audio.addEventListener('timeupdate', function() {
+            const percent = (audio.currentTime / audio.duration) * 100;
+            progress.style.width = `${percent}%`;
+            currentTimeEl.textContent = formatTime(audio.currentTime);
+        });
+        
+        // Click on progress bar to seek
+        progressBar.addEventListener('click', function(e) {
+            const width = this.clientWidth;
+            const clickX = e.offsetX;
+            const duration = audio.duration;
+            
+            audio.currentTime = (clickX / width) * duration;
+        });
+        
+        // Volume control
+        volumeBar.addEventListener('click', function(e) {
+            const width = this.clientWidth;
+            const clickX = e.offsetX;
+            const volume = clickX / width;
+            
+            audio.volume = volume;
+            volumeProgress.style.width = `${volume * 100}%`;
+            
+            // Update volume icon
+            if (volume === 0) {
+                volumeBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+            } else if (volume < 0.5) {
+                volumeBtn.innerHTML = '<i class="fas fa-volume-down"></i>';
+            } else {
+                volumeBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+            }
+        });
+        
+        // Toggle mute
+        volumeBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            audio.muted = !audio.muted;
+            
+            if (audio.muted) {
+                volumeBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                volumeProgress.style.width = '0%';
+            } else {
+                volumeBtn.innerHTML = audio.volume < 0.5 ? 
+                    '<i class="fas fa-volume-down"></i>' : 
+                    '<i class="fas fa-volume-up"></i>';
+                volumeProgress.style.width = `${audio.volume * 100}%`;
+            }
+        });
+        
+        // Format time (seconds to MM:SS)
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+    </script>
+</body>
+</html>
