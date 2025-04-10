@@ -49,9 +49,9 @@ class FeedService:
 
         return await FeedURLCRUD.get_feed_url_by_url(normalized_url)
 
-
     @staticmethod
     async def update_feed_news_by_url(url: str) -> Optional[FeedURLOut]:
+
         normalized_url = await FeedURLCRUD.normalize_url(url)
 
         feed_data = await FeedParser.fetch_feed(normalized_url)
@@ -63,9 +63,7 @@ class FeedService:
         feed_metadata["domain"] = urlparse(normalized_url).netloc
 
         await FeedURLCRUD.update_feed_url(normalized_url, feed_metadata)
-
         feed_items = FeedParser.parse_feed_items(feed_data, normalized_url)
-
         existing_links = await FeedNewsCRUD.get_existing_links([item["link"] for item in feed_items])
 
         new_items = [item for item in feed_items if item["link"] not in existing_links]
@@ -74,7 +72,6 @@ class FeedService:
             await FeedNewsCRUD.create_feed_news_items_bulk(new_items)
 
         return await FeedURLCRUD.get_feed_url_by_url(normalized_url)
-
 
     @staticmethod
     async def get_feed_by_id(feed_id: str):

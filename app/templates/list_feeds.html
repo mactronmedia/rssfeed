@@ -13,7 +13,7 @@
                 {% if feed.image %}
                     <img src="{{ feed.image }}" alt="Thumbnail for {{ feed.title }}" />
                 {% endif %}
-                <a href="/web/feed/{{ feed.id }}">{{ feed.title }}</a> - {{ feed.description }}
+                <a href="/feed/{{ feed.id }}">{{ feed.title }}</a> - {{ feed.description }}
             </li>
         {% else %}
             <p>No feeds available.</p>

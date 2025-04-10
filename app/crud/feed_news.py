@@ -49,6 +49,32 @@ class FeedNewsCRUD:
         return result.inserted_ids
 
     @staticmethod
+    async def get_all_news(limit: int = 30) -> List[FeedNewsItem]:
+        collection = get_feed_news_collection()
+        news_items = await collection.find().sort("pubDate", -1).limit(limit).to_list(None)
+        return [FeedNewsItem.from_mongo(item) for item in news_items]
+
+    @staticmethod
+    async def get_all_news_with_feed_info() -> List[dict]:
+        collection = get_feed_news_collection()
+
+        # Aggregate all news items with their corresponding feed information
+        pipeline = [
+            {
+                "$lookup": {
+                    "from": "feed_urls",
+                    "localField": "feed_url",
+                    "foreignField": "url",
+                    "as": "feed_info"
+                }
+            },
+            {"$unwind": "$feed_info"}
+        ]
+
+        results = await collection.aggregate(pipeline).to_list(None)
+        return results  # This will include both news and feed metadata
+
+    @staticmethod
     async def get_news_with_feed_info_by_feed_url(feed_url: str):
         collection = get_feed_news_collection()
 
