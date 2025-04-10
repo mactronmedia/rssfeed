@@ -1,66 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>News Dashboard</title>
-    <style>
-        body {
-            display: flex;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
+{% extends "base.html" %}
 
-        .sidebar {
-            width: 250px;
-            background-color: #f4f4f4;
-            padding: 1rem;
-            height: 100vh;
-            overflow-y: auto;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-        }
+{% block title %}Home | RSS Aggregator{% endblock %}
 
-        .content {
-            flex: 1;
-            padding: 2rem;
-        }
+{% block sidebar %}
+    {% include "components/sidebar.html" %}
+{% endblock %}
 
-        .feed-link {
-            display: block;
-            margin: 0.5rem 0;
-        }
-
-        .news-item {
-            margin-bottom: 2rem;
-            border-bottom: 1px solid #ccc;
-            padding-bottom: 1rem;
-        }
-
-        .news-item h3 {
-            margin: 0;
-        }
-
-        .news-item p {
-            margin: 0.5rem 0;
-        }
-    </style>
-</head>
-<body>
-    <div class="sidebar">
-        <h2>Feeds</h2>
-        {% for feed in feeds %}
-            <a href="/feed/{{ feed.id }}" class="feed-link">{{ feed.title }}</a>
-        {% endfor %}
-    </div>
-    <div class="content">
-        <h1>Latest News</h1>
-        {% for item in news %}
-            <div class="news-item">
-                <h3><a href="{{ item.link }}" target="_blank">{{ item.title }}</a></h3>
-                <p>{{ item.description }}</p>
-                <small>Published: {{ item.pubDate }}</small>
-            </div>
-        {% endfor %}
-    </div>
-</body>
-</html>
+{% block content %}
+    <h1 class="text-2xl font-bold mb-6">Latest News</h1>
+    {% include "components/news_list.html" %}
+{% endblock %}

@@ -1,58 +1,26 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-gray-900">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RSS Reader</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        gray: {
-                            900: '#111827',
-                            800: '#1F2937',
-                            700: '#374151',
-                            600: '#4B5563',
-                            500: '#6B7280',
-                            400: '#9CA3AF',
-                            300: '#D1D5DB',
-                            200: '#E5E7EB',
-                            100: '#F3F4F6',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- HTMX -->
-    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
-    <style>
-        [x-cloak] { display: none !important; }
-        .prose a { color: #3b82f6; }
-        .prose a:hover { text-decoration: underline; }
-    </style>
+    <title>RSS Aggregator</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="h-full">
-    <div class="min-h-full">
-        <div class="bg-gray-800 pb-32">
-            <header class="py-6">
-                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <h1 class="text-3xl font-bold tracking-tight text-white">RSS Reader</h1>
-                </div>
-            </header>
+<body class="bg-gray-900 text-white">
+
+    <div class="flex">
+        <!-- Sidebar -->
+        <div class="w-64 bg-gray-800 p-6">
+            {% include 'components/sidebar.html' %}
         </div>
 
-        <main class="-mt-32">
-            <div class="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
-                <div class="rounded-lg bg-gray-800 px-5 py-6 shadow sm:px-6">
-                    {% block content %}{% endblock %}
-                </div>
-            </div>
-        </main>
+        <!-- Main Content -->
+        <div class="flex-1 p-6">
+            {% block content %}
+            <!-- Content will go here -->
+            {% endblock %}
+        </div>
     </div>
+
 </body>
 </html>

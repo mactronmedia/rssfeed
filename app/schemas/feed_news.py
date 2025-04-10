@@ -14,6 +14,7 @@ class FeedNewsItem(BaseModel):
     link: str
     pubDate: str
     feed_url: str
+    media_thumbnail: Optional[str] = None  # Add this field for the thumbnail URL
     full_content: Optional[str] = None
     is_full_content_fetched: bool = False
 

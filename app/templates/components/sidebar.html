@@ -1,0 +1,11 @@
+<h2 class="text-lg font-semibold mb-4">Feeds</h2>
+<nav class="space-y-2">
+    {% for feed in feeds %}
+        <a href="/feed/{{ feed.id }}" class="block px-3 py-2 rounded hover:bg-gray-700 transition flex items-center">
+            {% if feed.image %}
+                <img src="{{ feed.image }}" alt="Feed Image" class="w-12 h-12 mr-4 rounded-md">
+            {% endif %}
+            <span>{{ feed.title }}</span>
+        </a>
+    {% endfor %}
+</nav>

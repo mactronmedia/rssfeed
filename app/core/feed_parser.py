@@ -31,7 +31,7 @@ class FeedParser:
         }
 
     @staticmethod
-    def parse_feed_items(feed_data, feed_url: str) -> list[dict]:
+    def parse_feed_items(feed_data, feed_url: str) -> List[dict]:
         items = []
         for entry in feed_data.entries:
             # Handle pubDate conversion
@@ -51,14 +51,40 @@ class FeedParser:
                 if match:
                     media_thumbnail = match.group(1)
 
+            # Fallback: try to extract image from content:encoded (HTML content)
+            if not media_thumbnail:
+                content = entry.get("content", [{}])[0].get("value", "")
+                match = re.search(r'<img[^>]+src="([^">]+)"', content)
+                if match:
+                    media_thumbnail = match.group(1)
+
+            # Explicitly check the enclosure tag if feedparser missed it
+            if not media_thumbnail:
+                enclosure = entry.get("enclosures", [])
+                if enclosure:
+                    # Assuming the first enclosure contains the image
+                    media_thumbnail = enclosure[0].get("url", "")
+
+            # Decode &amp; to & in the image URL if necessary
+            if media_thumbnail:
+                media_thumbnail = media_thumbnail.replace("&amp;", "&")
+
+            # Check for other variations, like image URLs with query parameters
+            if not media_thumbnail:
+                content = entry.get("content", [{}])[0].get("value", "")
+                match = re.search(r'<img[^>]+src=["\']([^"\']+)["\']', content)  # Improved regex to catch different quote styles
+                if match:
+                    media_thumbnail = match.group(1)
+
             items.append({
                 "title": entry.get("title", ""),
                 "description": entry.get("description", ""),
                 "link": entry.get("link", ""),
                 "pubDate": pub_date,
-                "media_thumbnail": media_thumbnail,
+                "media_thumbnail": media_thumbnail,  # Store the valid image URL
                 "feed_url": feed_url,
                 "full_content": "",
                 "is_full_content_fetched": False
             })
+
         return items

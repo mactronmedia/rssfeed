@@ -1,28 +1,34 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ feed.title }}</title>
-</head>
-<body>
-    <h1>{{ feed.title }}</h1>
-    <p>{{ feed.description }}</p>
-    <img src="{{ feed.image }}" alt="{{ feed.title }} logo" />
+{% extends "base.html" %}
 
-    <h2>Articles</h2>
-    <ul>
+{% block content %}
+<div class="container mx-auto p-4">
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-3xl font-semibold text-white">{{ feed.title }}</h1>
+        <a href="{{ feed.link }}" target="_blank" class="text-blue-400 hover:underline">Visit Feed</a>
+    </div>
+
+    <p class="text-lg text-gray-400 mb-4">{{ feed.description }}</p>
+
+    <!-- News Grid for the Feed -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {% for item in items %}
-        <li>
-            <a href="{{ item.link }}">{{ item.title }}</a><br>
-            <img src="{{ item.media_thumbnail }}" alt="thumbnail" width="100"/><br>
-            <small>{{ item.pubDate }}</small><br>
-            <p>{{ item.description | safe }}</p>
-        </li>
-        {% else %}
-        <p>No articles found for this feed.</p>
+            <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition">
+                <a href="{{ item.link }}" target="_blank">
+                    <img src="{{ item.media_thumbnail or '/static/img/default-thumb.jpg' }}"
+                         alt="Thumbnail"
+                         class="w-full h-40 object-cover">
+                </a>
+                <div class="p-4">
+                    <h2 class="text-lg font-semibold text-white mb-2 hover:underline">
+                        {{ item.title }}
+                    </h2>
+                    <p class="text-sm text-gray-400 mb-2">{{ item.pubDate }}</p>
+                    <p class="text-sm text-gray-300">
+                        {{ item.description[:100] | safe }}...
+                    </p>
+                </div>
+            </div>
         {% endfor %}
-    </ul>
-
-    <a href="/feeds">Back to feeds list</a>
-</body>
-</html>
+    </div>
+</div>
+{% endblock %}
