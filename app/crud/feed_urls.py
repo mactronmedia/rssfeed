@@ -58,4 +58,4 @@ class FeedURLCRUD:
         url = url.strip()
         if url.endswith('/'):
             url = url[:-1]
-        return url.lower()        
+        return url.lower()  
