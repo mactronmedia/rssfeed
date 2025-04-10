@@ -73,9 +73,9 @@ class FeedNewsCRUD:
 
 
     @staticmethod
-    async def get_news_with_feed_info_by_feed_url(feed_url: str):
+    async def get_news_with_feed_info_by_feed_url(feed_url: str, limit: int = 20):
         latest_news = get_feed_news_collection()
-        latest_news = latest_news.find({"feed_url": feed_url}).sort("pubDate", -1)
+        latest_news = latest_news.find({"feed_url": feed_url}).sort("pubDate", -1).limit(limit)
         return await latest_news.to_list(length=None)
 
 
