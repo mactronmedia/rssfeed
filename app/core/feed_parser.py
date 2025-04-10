@@ -31,6 +31,13 @@ class FeedParser:
         }
 
     @staticmethod
+    @staticmethod
+    def clean_html(html: str) -> str:
+        # Simple method to clean HTML tags, can be adjusted as necessary
+        clean = re.sub(r'<[^>]+>', '', html)
+        return clean.strip()
+
+    @staticmethod
     def parse_feed_items(feed_data, feed_url: str) -> List[dict]:
         items = []
         for entry in feed_data.entries:
@@ -41,29 +48,37 @@ class FeedParser:
             else:
                 pub_date = datetime.utcnow().isoformat()
 
-            # Get media thumbnail if available
-            media_thumbnail = entry.get("media_thumbnail", [{}])[0].get("url", "") if "media_thumbnail" in entry else ""
+            # Initialize media_thumbnail as an empty string
+            media_thumbnail = ""
 
-            # Fallback: try to extract image from description if thumbnail is missing
+            # Check for media:content and extract URL if present
+            if "media_content" in entry:
+                media_contents = entry.get("media_content", [])
+                media_contents.sort(key=lambda x: int(x.get("width", 0)), reverse=True)
+
+                # Extract the URL from the largest image found (if any)
+                if media_contents:
+                    media_thumbnail = media_contents[0].get("url", "")
+
+            # Fallback: Try extracting an image from enclosure
+            if not media_thumbnail:
+                enclosure = entry.get("enclosures", [])
+                if enclosure:
+                    media_thumbnail = enclosure[0].get("url", "")
+
+            # Fallback: Try extracting an image from the description (HTML <img>)
             if not media_thumbnail:
                 description = entry.get("description", "")
                 match = re.search(r'<img[^>]+src="([^">]+)"', description)
                 if match:
                     media_thumbnail = match.group(1)
 
-            # Fallback: try to extract image from content:encoded (HTML content)
+            # Fallback: Try extracting an image from content:encoded (HTML <img>)
             if not media_thumbnail:
                 content = entry.get("content", [{}])[0].get("value", "")
                 match = re.search(r'<img[^>]+src="([^">]+)"', content)
                 if match:
                     media_thumbnail = match.group(1)
-
-            # Explicitly check the enclosure tag if feedparser missed it
-            if not media_thumbnail:
-                enclosure = entry.get("enclosures", [])
-                if enclosure:
-                    # Assuming the first enclosure contains the image
-                    media_thumbnail = enclosure[0].get("url", "")
 
             # Decode &amp; to & in the image URL if necessary
             if media_thumbnail:

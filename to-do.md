@@ -43,3 +43,6 @@ inoreader_clone/
 
 
 Template: https://chatgpt.com/c/67f69996-6188-800c-8368-5726a4459c36
+
+
+https://about.fb.com/wp-content/uploads/2016/05/rss-urls-1.pdf
