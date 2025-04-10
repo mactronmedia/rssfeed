@@ -1,3 +1,5 @@
+# services/feed_service.py
+
 from typing import Optional
 from urllib.parse import urlparse
 from app.core.feed_parser import FeedParser
@@ -51,9 +53,17 @@ class FeedService:
     async def get_feed_by_id(feed_id: str):
         # Fetch feed data by its ID from the database
         # http://localhost:8000/web/feed/67f63d499efb47e5229f196e
-        
         feed = await FeedURLCRUD.get_feed_url_by_id(feed_id)
         return feed
+
+    @staticmethod
+    async def get_feed_with_items_by_id(feed_id: str):
+        feed = await FeedURLCRUD.get_feed_url_by_id(feed_id)
+        if not feed:
+            return None, []
+
+        items = await FeedNewsCRUD.get_news_items_by_feed_url(feed.url)
+        return feed, items
 
     @staticmethod
     async def get_all_feeds():

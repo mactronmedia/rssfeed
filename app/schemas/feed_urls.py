@@ -14,7 +14,8 @@ class FeedURLOut(BaseModel):
     pubDate: datetime
     last_updated: datetime
     domain: str
-
+    url: str  
+    
     model_config = ConfigDict(
         from_attributes=True,
         populate_by_name=True,
