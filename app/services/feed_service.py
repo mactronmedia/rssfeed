@@ -58,6 +58,8 @@ class FeedService:
 
     @staticmethod
     async def get_feed_with_items_by_id(feed_id: str):
+        # Join both collection and read metadata of feed_urls and
+        # latest news of feed_news
         feed = await FeedURLCRUD.get_feed_url_by_id(feed_id)
         if not feed:
             return None, []
