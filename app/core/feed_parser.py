@@ -69,16 +69,13 @@ class FeedParser:
             if media_thumbnail:
                 media_thumbnail = media_thumbnail.replace("&amp;", "&")
 
-            # Check for other variations, like image URLs with query parameters
-            if not media_thumbnail:
-                content = entry.get("content", [{}])[0].get("value", "")
-                match = re.search(r'<img[^>]+src=["\']([^"\']+)["\']', content)  # Improved regex to catch different quote styles
-                if match:
-                    media_thumbnail = match.group(1)
+            # Clean and extract text from description (removing all HTML tags)
+            description = entry.get("description", "")
+            clean_description = FeedParser.clean_html(description)
 
             items.append({
                 "title": entry.get("title", ""),
-                "description": entry.get("description", ""),
+                "description": clean_description,  # Cleaned description
                 "link": entry.get("link", ""),
                 "pubDate": pub_date,
                 "media_thumbnail": media_thumbnail,  # Store the valid image URL
@@ -88,3 +85,23 @@ class FeedParser:
             })
 
         return items
+
+    @staticmethod
+    def clean_html(content: str) -> str:
+        # Remove all tags except <p> (paragraphs) and convert them to plain text
+        cleaned = re.sub(r'<(?!p\s*[^>]*>)([^>]+)>', '', content)  # Use 'content' here
+        
+        # Convert <p> tags into newline characters to preserve paragraph structure
+        cleaned = re.sub(r'<p\s*[^>]*>', '\n', cleaned)  # Replace <p> with newline
+        cleaned = re.sub(r'</p>', '\n', cleaned)  # Replace </p> with newline
+        
+        # Remove unwanted script, iframe, and other potentially harmful elements
+        cleaned = re.sub(r'<(script|iframe)[^>]*>.*?</\1>', '', cleaned, flags=re.DOTALL)
+        
+        # Remove any remaining tags (e.g., <a>, <img>, <br>, etc.)
+        cleaned = re.sub(r'<[^>]+>', '', cleaned)
+        
+        # Optionally, trim excessive spaces or newlines
+        cleaned = re.sub(r'\n+', '\n', cleaned).strip()
+        
+        return cleaned

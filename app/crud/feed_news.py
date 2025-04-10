@@ -57,8 +57,6 @@ class FeedNewsCRUD:
     @staticmethod
     async def get_all_news_with_feed_info() -> List[dict]:
         collection = get_feed_news_collection()
-
-        # Aggregate all news items with their corresponding feed information
         pipeline = [
             {
                 "$lookup": {
@@ -70,15 +68,12 @@ class FeedNewsCRUD:
             },
             {"$unwind": "$feed_info"}
         ]
-
         results = await collection.aggregate(pipeline).to_list(None)
         return results  # This will include both news and feed metadata
 
     @staticmethod
     async def get_news_with_feed_info_by_feed_url(feed_url: str):
         collection = get_feed_news_collection()
-
-        # Now, use the feed_url directly instead of undefined target_url
         pipeline = [
             {"$match": {"feed_url": feed_url}},  # Use feed_url here
             {
@@ -91,7 +86,5 @@ class FeedNewsCRUD:
             },
             {"$unwind": "$feed_info"}
         ]
-
-        # Execute the aggregation pipeline
         results = await collection.aggregate(pipeline).to_list(None)
         return results
