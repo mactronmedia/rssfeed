@@ -4,7 +4,7 @@ import random
 import time
 
 # URL of the RSS feed
-rss_url = "https://www.business-standard.com/rss/latest.rss"
+rss_url = "https://www.had.si/blog/"
 
 # Proxies (replace with your actual proxy credentials if needed)
 proxies = {
