@@ -1,6 +1,5 @@
 # services/feed_service.py
 
-import aiohttp
 from typing import Optional
 from urllib.parse import urlparse
 from app.core.feed_parser import FeedParser
@@ -60,14 +59,8 @@ class FeedService:
         feed_metadata["url"] = normalized_url
         feed_metadata["domain"] = urlparse(normalized_url).netloc
 
-        # non BS4 image parser
-        # await FeedURLCRUD.update_feed_url(normalized_url, feed_metadata)
-        # feed_items = FeedParser.parse_feed_items(feed_data, normalized_url)
-
-        # BS4 image parser
-        async with aiohttp.ClientSession() as session:
-            feed_items = await FeedParser.parse_feed_items(feed_data, normalized_url, session)
-
+        await FeedURLCRUD.update_feed_url(normalized_url, feed_metadata)
+        feed_items = FeedParser.parse_feed_items(feed_data, normalized_url)
 
         # Get existing links to filter out already existing news
         existing_links = await FeedNewsCRUD.get_existing_links([item["link"] for item in feed_items])
@@ -109,4 +102,3 @@ class FeedService:
     @staticmethod
     async def get_feed_items(feed_url: str, limit: int = 20):
         return await FeedNewsCRUD.get_news_items_by_feed_url(feed_url, limit)
-

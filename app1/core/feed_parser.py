@@ -1,14 +1,13 @@
+# core/feed_parser.py
+
 import re
-import html
 import aiohttp
 import feedparser
 from datetime import datetime
 from typing import Dict, List
 from urllib.parse import urlparse
-from bs4 import BeautifulSoup
 
 class FeedParser:
-
     @staticmethod
     async def fetch_feed(url: str) -> Dict:
         headers = {
@@ -34,85 +33,60 @@ class FeedParser:
         }
 
     @staticmethod
-    async def parse_feed_items(feed_data, feed_url: str, session: aiohttp.ClientSession) -> List[dict]:
+    def parse_feed_items(feed_data, feed_url: str) -> List[dict]:
         items = []
         for entry in feed_data.entries:
+            # Handle pubDate conversion
             pub_date = entry.get("published_parsed")
-            pub_date = datetime(*pub_date[:6]).isoformat() if pub_date else datetime.utcnow().isoformat()
+            if pub_date:
+                pub_date = datetime(*pub_date[:6]).isoformat()
+            else:
+                pub_date = datetime.utcnow().isoformat()
 
+            # Get media thumbnail if available
             media_thumbnail = entry.get("media_thumbnail", [{}])[0].get("url", "") if "media_thumbnail" in entry else ""
 
+            # Fallback: try to extract image from description if thumbnail is missing
             if not media_thumbnail:
                 description = entry.get("description", "")
-                media_thumbnail = FeedParser.extract_image_with_bs(description)
+                match = re.search(r'<img[^>]+src="([^">]+)"', description)
+                if match:
+                    media_thumbnail = match.group(1)
 
+            # Fallback: try to extract image from content:encoded (HTML content)
             if not media_thumbnail:
                 content = entry.get("content", [{}])[0].get("value", "")
-                media_thumbnail = FeedParser.extract_image_with_bs(content)
+                match = re.search(r'<img[^>]+src="([^">]+)"', content)
+                if match:
+                    media_thumbnail = match.group(1)
 
+            # Explicitly check the enclosure tag if feedparser missed it
             if not media_thumbnail:
                 enclosure = entry.get("enclosures", [])
                 if enclosure:
+                    # Assuming the first enclosure contains the image
                     media_thumbnail = enclosure[0].get("url", "")
 
-            # FINAL fallback: fetch image from article page
-            if not media_thumbnail:
-                article_url = entry.get("link", "")
-                if article_url:
-                    media_thumbnail = await FeedParser.fetch_image_from_article(article_url, session)
-
+            # Decode &amp; to & in the image URL if necessary
             if media_thumbnail:
                 media_thumbnail = media_thumbnail.replace("&amp;", "&")
 
+            # Clean and extract text from description (removing all HTML tags)
             description = entry.get("description", "")
             clean_description = FeedParser.clean_html(description)
 
             items.append({
                 "title": entry.get("title", ""),
-                "description": clean_description,
+                "description": clean_description,  # Cleaned description
                 "link": entry.get("link", ""),
                 "pubDate": pub_date,
-                "media_thumbnail": media_thumbnail,
+                "media_thumbnail": media_thumbnail,  # Store the valid image URL
                 "feed_url": feed_url,
                 "full_content": "",
                 "is_full_content_fetched": False
             })
 
         return items
-
-    @staticmethod
-    def extract_image_with_bs(html_content: str) -> str:
-        if not html_content:
-            return ""
-        soup = BeautifulSoup(html_content, "lxml")
-        img_tag = soup.find("img")
-        if img_tag and img_tag.get("src"):
-            return img_tag["src"]
-        return ""
-
-    @staticmethod
-    async def fetch_image_from_article(url: str, session: aiohttp.ClientSession) -> str:
-        try:
-            async with session.get(url, timeout=10) as response:
-                if response.status == 200:
-                    html = await response.text()
-                    soup = BeautifulSoup(html, "lxml")
-
-                    og_image = soup.find("meta", property="og:image")
-                    if og_image and og_image.get("content"):
-                        return og_image["content"]
-
-                    twitter_image = soup.find("meta", attrs={"name": "twitter:image"})
-                    if twitter_image and twitter_image.get("content"):
-                        return twitter_image["content"]
-
-                    img_tag = soup.find("img")
-                    if img_tag and img_tag.get("src"):
-                        return img_tag["src"]
-        except Exception as e:
-            print(f"Failed to fetch image from article: {e}")
-
-        return ""
 
     @staticmethod
     def clean_html(content: str) -> str:
@@ -122,4 +96,5 @@ class FeedParser:
         cleaned = re.sub(r'<(script|iframe)[^>]*>.*?</\1>', '', cleaned, flags=re.DOTALL)
         cleaned = re.sub(r'<[^>]+>', '', cleaned)
         cleaned = re.sub(r'\n+', '\n', cleaned).strip()
+        
         return cleaned
