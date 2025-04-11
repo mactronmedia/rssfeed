@@ -1,15 +1,14 @@
 <h2 class="text-lg font-semibold mb-4">Feeds</h2>
-<nav class="space-y-2">
+<nav class="space-y-px"> <!-- Minimal spacing -->
     {% for feed in feeds %}
-        <a href="/feed/{{ feed.id }}" class="block px-3 py-2 rounded hover:bg-gray-700 transition flex items-center">
+        <a href="/feed/{{ feed.id }}" class="block px-3 py-1 rounded hover:bg-gray-700 transition flex items-center">
             {% if feed.image %}
-                <img src="{{ feed.image }}" alt="Feed Image" class="w-12 h-12 mr-4 rounded-md">
+                <img src="{{ feed.image }}" alt="Feed Image" class="w-8 h-8 mr-3 rounded-md"> <!-- slightly smaller -->
             {% endif %}
-            <span>{{ feed.title }}</span>
+            {{ feed.title[:12] }}{% if feed.title|length > 15 %}...{% endif %}
         </a>
     {% endfor %}
     <div class="flex justify-center mb-4">
         <a href="/" class="text-blue-400 hover:underline">Home</a>
     </div>
-
 </nav>

@@ -29,21 +29,26 @@ class FeedService:
         feed_metadata["url"] = normalized_url
         feed_metadata["domain"] = domain
 
+        # Insert feed metadata into the database
         await FeedURLCRUD.create_feed_url(feed_metadata)
 
+        # Parse the feed items (news articles)
         feed_items = FeedParser.parse_feed_items(feed_data, normalized_url)
-        
+
+        # Get existing links from the database
         existing_links = await FeedNewsCRUD.get_existing_links([item["link"] for item in feed_items])
+        
+        # Filter out items that already exist in the database
         new_items = [item for item in feed_items if item["link"] not in existing_links]
         
         if new_items:
+            # Insert only the new items (no duplicates)
             await FeedNewsCRUD.create_feed_news_items_bulk(new_items)
 
         return await FeedURLCRUD.get_feed_url_by_url(normalized_url)
 
     @staticmethod
     async def update_feed_news_by_url(url: str) -> Optional[FeedURLOut]:
-
         normalized_url = await FeedURLCRUD.normalize_url(url)
 
         feed_data = await FeedParser.fetch_feed(normalized_url)
@@ -56,8 +61,11 @@ class FeedService:
 
         await FeedURLCRUD.update_feed_url(normalized_url, feed_metadata)
         feed_items = FeedParser.parse_feed_items(feed_data, normalized_url)
+
+        # Get existing links to filter out already existing news
         existing_links = await FeedNewsCRUD.get_existing_links([item["link"] for item in feed_items])
 
+        # Filter out news items that are already present
         new_items = [item for item in feed_items if item["link"] not in existing_links]
 
         if new_items:
