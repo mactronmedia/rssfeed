@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RSS Aggregator</title>
+    <title>{% block title %}RSS Aggregator{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-900 text-white">
-
     <div class="flex">
-        <!-- Sidebar -->
+        <!-- Single Sidebar -->
         <div class="w-64 bg-gray-800 p-6">
-            {% include 'components/sidebar.html' %}
+            {% block sidebar %}
+                {% include 'components/sidebar.html' %}
+            {% endblock %}
         </div>
 
         <!-- Main Content -->
@@ -22,5 +23,8 @@
         </div>
     </div>
 
+    {% block scripts %}
+    <!-- Scripts will go here -->
+    {% endblock %}
 </body>
 </html>
