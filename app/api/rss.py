@@ -1,5 +1,7 @@
 # api/rss.py
+import asyncio
 from typing import Optional
+from fastapi import BackgroundTasks
 from fastapi import APIRouter, HTTPException, Query, status
 from app.services.feed_service import FeedService
 from app.services.article_service import ArticleService
@@ -21,7 +23,36 @@ class FeedNewsAPI:
         router.add_api_route("/feeds/search/", FeedNewsAPI.search_feed_urls, methods=["GET"], response_model=list[FeedURLOut], tags=["Feeds"])
         router.add_api_route("/feeds/with-items/", FeedNewsAPI.add_and_fetch_items, methods=["GET"], response_model=dict, tags=["Feeds"])
         router.add_api_route("/feeds/update/", FeedNewsAPI.update_feed_by_url, methods=["GET"], response_model=FeedURLOut, tags=["Feeds"])
+        router.add_api_route("/feeds/update-all/",FeedNewsAPI.update_all_feeds_periodically,methods=["GET"],response_model=dict,tags=["Feeds"])
 
+
+
+
+    @staticmethod
+    async def update_all_feeds_periodically(background_tasks: BackgroundTasks, interval_min: int = 5):
+        """
+        Start a background task to update all feeds every X minutes (default: 5)
+        Returns immediately with status, actual updates happen in background
+        """
+        background_tasks.add_task(FeedNewsAPI._periodic_feed_updater, interval_min)
+        return {"status": "started", "message": f"Feed updates scheduled every {interval_min} minutes"}
+    
+    @staticmethod
+    async def _periodic_feed_updater(interval_min: int):
+        """Background task that runs forever updating feeds"""
+        while True:
+            try:
+                feeds = await FeedService.get_all_feeds()
+                for feed in feeds:
+                    try:
+                        await FeedService.update_feed_news_by_url(feed.url)
+                        print(f"Updated feed: {feed.url}")
+                    except Exception as e:
+                        print(f"Failed to update {feed.url}: {str(e)}")
+            except Exception as e:
+                print(f"Error in periodic updater: {str(e)}")
+            
+            await asyncio.sleep(interval_min * 60)  # Convert minutes to seconds
 
     '''
    @staticmethod

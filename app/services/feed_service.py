@@ -34,8 +34,8 @@ class FeedService:
         await FeedURLCRUD.create_feed_url(feed_metadata)
 
         # Parse the feed items (news articles)
-        feed_items = FeedParser.parse_feed_items(feed_data, normalized_url)
-
+        async with aiohttp.ClientSession() as session:
+            feed_items = await FeedParser.parse_feed_items(feed_data, normalized_url, session)
         # Get existing links from the database
         existing_links = await FeedNewsCRUD.get_existing_links([item["link"] for item in feed_items])
         
