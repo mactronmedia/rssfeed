@@ -1,9 +1,9 @@
-<div id="news" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+<div id="news-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
     {% for item in news %}
     <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition">
         <a href="{{ item.link }}" target="_blank">
             <img src="{{ item.media_thumbnail or '/static/img/default-thumb.jpg' }}"
-                alt="Thumbnail"
+                alt="{{ item.title[:100] }}"
                 class="w-full h-40 object-cover">
             <div class="p-4">
                 <h2 class="text-[12px] font-semibold text-gray-300 hover:text-white hover:underline mb-2 leading-tight">

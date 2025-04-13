@@ -1,3 +1,5 @@
+// Refresh news id to get latest news
+
 document.addEventListener('DOMContentLoaded', function() {
     const newsContainer = document.getElementById('news-container');
     
@@ -12,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             const html = await response.text();
-            console.log('Received HTML:', html.substring(0, 100) + '...'); // Log first 100 chars
+            //console.log('Received HTML:', html.substring(0, 100) + '...'); // Log first 100 chars
             newsContainer.innerHTML = html;
             // console.log('News refreshed at:', new Date().toLocaleTimeString());
         } catch (error) {
@@ -29,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
     refreshNews();
     
     // Refresh every second (1000ms)
-    setInterval(refreshNews, 1000);
+    setInterval(refreshNews, 100000);
 });
 
 
