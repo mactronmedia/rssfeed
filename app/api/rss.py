@@ -23,12 +23,13 @@ class FeedNewsAPI:
         router.add_api_route("/feeds/search/", FeedNewsAPI.search_feed_urls, methods=["GET"], response_model=list[FeedURLOut], tags=["Feeds"])
         router.add_api_route("/feeds/with-items/", FeedNewsAPI.add_and_fetch_items, methods=["GET"], response_model=dict, tags=["Feeds"])
         router.add_api_route("/feeds/update/", FeedNewsAPI.update_feed_by_url, methods=["GET"], response_model=FeedURLOut, tags=["Feeds"])
-        router.add_api_route("/feeds/update-all/",FeedNewsAPI.update_all_feeds_periodically,methods=["GET"],response_model=dict,tags=["Feeds"])
+        router.add_api_route("/feeds/update-all/",FeedNewsAPI.update_all_feeds_periodically,methods=["GET"],response_model=dict,tags=["Feeds"]) # API To Update All Feeds
 
 
 
 
     @staticmethod
+    # API Call To Update All Feeds in DB
     async def update_all_feeds_periodically(background_tasks: BackgroundTasks, interval_min: int = 5):
         """
         Start a background task to update all feeds every X minutes (default: 5)

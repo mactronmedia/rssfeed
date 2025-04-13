@@ -15,6 +15,7 @@ from app.routers import web  # Import the new web router
 
 app = FastAPI()
 templates = Jinja2Templates(directory="app/templates")
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 # Add middleware
 @app.middleware("http")
