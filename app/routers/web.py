@@ -61,7 +61,7 @@ async def get_feed_by_id(request: Request, feed_id: str):
         # Fetch all feeds to display in the sidebar
         feeds = await FeedService.get_all_feeds()
 
-        return templates.TemplateResponse("feed_detail.html", {
+        return templates.TemplateResponse("components/feed_detail.html", {
             "request": request,
             "feed": feed,
             "items": items_with_feed,
