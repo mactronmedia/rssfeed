@@ -9,6 +9,7 @@ import feedparser
 from datetime import datetime
 from typing import Dict, List, Optional
 from urllib.parse import urlparse
+from functools import lru_cache
 from selectolax.parser import HTMLParser  # Faster alternative to BeautifulSoup
 from fastapi import HTTPException
 
@@ -136,15 +137,18 @@ class FeedParser:
 
 
     @staticmethod
+    @lru_cache(maxsize=1000)
     def extract_image_from_html(html_content: str) -> str:
         """Extract first image URL from HTML content with multiple fallback methods"""
         if not html_content:
             return ""
         
+        # First try fast regex method
         img_match = re.search(r'<img[^>]+src=["\']([^"\'>]+)', html_content)
         if img_match:
             return img_match.group(1).split('"')[0].split("'")[0]
         
+        # Fall back to selectolax if regex fails
         try:
             tree = HTMLParser(html_content)
             img = tree.css_first("img")
@@ -161,9 +165,11 @@ class FeedParser:
         try:
             async with session.get(url, timeout=10) as response:
                 if response.status == 200:
+                    # Only read the first 50KB - enough to find meta tags
                     content = await response.content.read(50000)
                     html = content.decode('utf-8', errors='ignore')
                     
+                    # First try fast regex for Open Graph/Twitter images
                     og_match = re.search(r'<meta\s[^>]*property=["\']og:image["\'][^>]*content=["\']([^"\'>]+)', html)
                     if og_match:
                         return og_match.group(1).split('"')[0].split("'")[0]
@@ -202,9 +208,17 @@ class FeedParser:
         """Clean HTML content while preserving paragraphs"""
         if not content:
             return ""
+            
+        # Remove script and iframe tags
         cleaned = re.sub(r'<(script|iframe)[^>]*>.*?</\1>', '', content, flags=re.DOTALL)
+        
+        # Replace paragraphs with newlines
         cleaned = re.sub(r'</?p[^>]*>', '\n', cleaned)
+        
+        # Remove all other tags
         cleaned = re.sub(r'<[^>]+>', '', cleaned)
+        
+        # Normalize whitespace and clean up
         cleaned = re.sub(r'\n{3,}', '\n\n', cleaned)
         cleaned = re.sub(r'[ \t]{2,}', ' ', cleaned)
         cleaned = cleaned.strip()

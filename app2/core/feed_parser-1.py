@@ -1,5 +1,3 @@
-# feed_parser.py 
-
 import re
 import html
 import time
@@ -9,6 +7,7 @@ import feedparser
 from datetime import datetime
 from typing import Dict, List, Optional
 from urllib.parse import urlparse
+from functools import lru_cache
 from selectolax.parser import HTMLParser  # Faster alternative to BeautifulSoup
 from fastapi import HTTPException
 
@@ -61,7 +60,7 @@ class FeedParser:
         """Parse feed items with parallel image fetching"""
         items = []
         article_fetch_tasks = []
-
+        
         for entry in feed_data.entries:
             # Parse publication date
             pub_date = entry.get("published_parsed")
@@ -70,29 +69,20 @@ class FeedParser:
             except (TypeError, ValueError):
                 pub_date = datetime.utcnow().isoformat()
 
-            media_thumbnail = ""  
-
-            # Try media_thumbnail first
-            if "media_thumbnail" in entry:
-                media_thumbnail = entry["media_thumbnail"][0].get("url", "")
-
-            # If still not found, try media_content
-            if not media_thumbnail and "media_content" in entry:
-                for media in entry["media_content"]:
-                    if media.get("medium") == "image" and media.get("type", "").startswith("image/"):
-                        media_thumbnail = media.get("url", "")
-                        break
-
-            # Fallback: try extracting from description
+            # Try to get thumbnail from various sources without fetching article
+            media_thumbnail = (
+                entry.get("media_thumbnail", [{}])[0].get("url", "") 
+                if "media_thumbnail" in entry 
+                else ""
+            )
+            
             if not media_thumbnail:
                 media_thumbnail = FeedParser.extract_image_from_html(entry.get("description", ""))
 
-            # Fallback: try extracting from content
             if not media_thumbnail:
                 content = entry.get("content", [{}])[0].get("value", "")
                 media_thumbnail = FeedParser.extract_image_from_html(content)
 
-            # Fallback: try enclosures
             if not media_thumbnail:
                 enclosure = entry.get("enclosures", [])
                 media_thumbnail = enclosure[0].get("url", "") if enclosure else ""
@@ -114,16 +104,16 @@ class FeedParser:
                 article_fetch_tasks.append(FeedParser.fetch_image_from_article(entry.get("link"), session))
             else:
                 article_fetch_tasks.append(None)
-
+                
             items.append(item)
-
+        
         # Fetch all article images in parallel
         if any(task is not None for task in article_fetch_tasks):
             article_images = await asyncio.gather(
                 *[task for task in article_fetch_tasks if task is not None],
                 return_exceptions=True
             )
-
+            
             # Update items with fetched images
             img_index = 0
             for i, item in enumerate(items):
@@ -131,20 +121,22 @@ class FeedParser:
                     if not isinstance(article_images[img_index], Exception):
                         item["media_thumbnail"] = article_images[img_index].replace("&amp;", "&")
                     img_index += 1
-
+        
         return items
 
-
     @staticmethod
+    @lru_cache(maxsize=1000)
     def extract_image_from_html(html_content: str) -> str:
         """Extract first image URL from HTML content with multiple fallback methods"""
         if not html_content:
             return ""
         
+        # First try fast regex method
         img_match = re.search(r'<img[^>]+src=["\']([^"\'>]+)', html_content)
         if img_match:
             return img_match.group(1).split('"')[0].split("'")[0]
         
+        # Fall back to selectolax if regex fails
         try:
             tree = HTMLParser(html_content)
             img = tree.css_first("img")
@@ -161,9 +153,11 @@ class FeedParser:
         try:
             async with session.get(url, timeout=10) as response:
                 if response.status == 200:
+                    # Only read the first 50KB - enough to find meta tags
                     content = await response.content.read(50000)
                     html = content.decode('utf-8', errors='ignore')
                     
+                    # First try fast regex for Open Graph/Twitter images
                     og_match = re.search(r'<meta\s[^>]*property=["\']og:image["\'][^>]*content=["\']([^"\'>]+)', html)
                     if og_match:
                         return og_match.group(1).split('"')[0].split("'")[0]
@@ -202,9 +196,17 @@ class FeedParser:
         """Clean HTML content while preserving paragraphs"""
         if not content:
             return ""
+            
+        # Remove script and iframe tags
         cleaned = re.sub(r'<(script|iframe)[^>]*>.*?</\1>', '', content, flags=re.DOTALL)
+        
+        # Replace paragraphs with newlines
         cleaned = re.sub(r'</?p[^>]*>', '\n', cleaned)
+        
+        # Remove all other tags
         cleaned = re.sub(r'<[^>]+>', '', cleaned)
+        
+        # Normalize whitespace and clean up
         cleaned = re.sub(r'\n{3,}', '\n\n', cleaned)
         cleaned = re.sub(r'[ \t]{2,}', ' ', cleaned)
         cleaned = cleaned.strip()
