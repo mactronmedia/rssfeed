@@ -40,20 +40,23 @@ class FeedNewsAPI:
     
     @staticmethod
     async def _periodic_feed_updater(interval_min: int):
-        """Background task that runs forever updating feeds"""
+        """Background task that updates all feeds concurrently using a shared session"""
         while True:
             try:
-                feeds = await FeedService.get_all_feeds()
-                for feed in feeds:
-                    try:
-                        await FeedService.update_feed_news_by_url(feed.url)
-                        print(f"Updated feed: {feed.url}")
-                    except Exception as e:
-                        print(f"Failed to update {feed.url}: {str(e)}")
+                print(f"[FeedUpdater] Starting update cycle (every {interval_min} min)")
+                results = await FeedService.update_all_feeds_concurrently()
+                
+                for result in results:
+                    if isinstance(result, Exception):
+                        print(f"[FeedUpdater] Error during feed update: {result}")
+                    elif result:
+                        print(f"[FeedUpdater] Updated feed: {result.url}")
+                    else:
+                        print(f"[FeedUpdater] Skipped or failed feed")
             except Exception as e:
-                print(f"Error in periodic updater: {str(e)}")
+                print(f"[FeedUpdater] Fatal error in periodic updater: {e}")
             
-            await asyncio.sleep(interval_min * 60)  # Convert minutes to seconds
+            await asyncio.sleep(interval_min * 60)  # Sleep between update cycles
 
     '''
    @staticmethod

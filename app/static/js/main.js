@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
     refreshNews();
     
     // Refresh every second (1000ms)
-    setInterval(refreshNews, 100000);
+    setInterval(refreshNews, 1000);
 });
 
 

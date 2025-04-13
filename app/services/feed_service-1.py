@@ -1,7 +1,6 @@
 # services/feed_service.py
 
 import aiohttp
-import asyncio
 from typing import Optional
 from urllib.parse import urlparse
 from app.core.feed_parser import FeedParser
@@ -51,47 +50,30 @@ class FeedService:
         return await FeedURLCRUD.get_feed_url_by_url(normalized_url)
 
     @staticmethod
-    async def update_feed_news_by_url(url: str, session: Optional[aiohttp.ClientSession] = None) -> Optional[FeedURLOut]:
+    async def update_feed_news_by_url(url: str) -> Optional[FeedURLOut]:
         normalized_url = await FeedURLCRUD.normalize_url(url)
 
-        # Use passed session, or create a new one if missing
-        if session is None:
-            async with aiohttp.ClientSession() as session:
-                return await FeedService.update_feed_news_by_url(url, session)
+        async with aiohttp.ClientSession() as session:
+            feed_data = await FeedParser.fetch_feed(normalized_url, session)
+            if not feed_data or hasattr(feed_data, 'bozo_exception'):
+                return None
 
-        feed_data = await FeedParser.fetch_feed(normalized_url, session)
-        if not feed_data or hasattr(feed_data, 'bozo_exception'):
-            return None
+            feed_metadata = FeedParser.parse_feed_metadata(feed_data)
+            feed_metadata["url"] = normalized_url
+            feed_metadata["domain"] = urlparse(normalized_url).netloc
 
-        feed_metadata = FeedParser.parse_feed_metadata(feed_data)
-        feed_metadata["url"] = normalized_url
-        feed_metadata["domain"] = urlparse(normalized_url).netloc
+            feed_items = await FeedParser.parse_feed_items(feed_data, normalized_url, session)
 
-        feed_items = await FeedParser.parse_feed_items(feed_data, normalized_url, session)
-
+        # Get existing links to filter out already existing news
         existing_links = await FeedNewsCRUD.get_existing_links([item["link"] for item in feed_items])
+
+        # Filter out news items that are already present
         new_items = [item for item in feed_items if item["link"] not in existing_links]
 
         if new_items:
             await FeedNewsCRUD.create_feed_news_items_bulk(new_items)
 
         return await FeedURLCRUD.get_feed_url_by_url(normalized_url)
-
-    @staticmethod
-    async def update_all_feeds_concurrently():
-        feed_urls = await FeedURLCRUD.get_all_feed_urls()
-        if not feed_urls:
-            return []
-
-        async with aiohttp.ClientSession() as session:
-            tasks = [
-                FeedService.update_feed_news_by_url(feed.url, session)
-                for feed in feed_urls
-            ]
-            return await asyncio.gather(*tasks, return_exceptions=True)
-
-
-
 
     @staticmethod
     async def get_feed_by_id(feed_id: str):
