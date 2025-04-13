@@ -1,3 +1,5 @@
+# feed_parser.py 
+
 import re
 import html
 import time
@@ -60,7 +62,7 @@ class FeedParser:
         """Parse feed items with parallel image fetching"""
         items = []
         article_fetch_tasks = []
-        
+
         for entry in feed_data.entries:
             # Parse publication date
             pub_date = entry.get("published_parsed")
@@ -69,20 +71,29 @@ class FeedParser:
             except (TypeError, ValueError):
                 pub_date = datetime.utcnow().isoformat()
 
-            # Try to get thumbnail from various sources without fetching article
-            media_thumbnail = (
-                entry.get("media_thumbnail", [{}])[0].get("url", "") 
-                if "media_thumbnail" in entry 
-                else ""
-            )
-            
+            media_thumbnail = ""  
+
+            # Try media_thumbnail first
+            if "media_thumbnail" in entry:
+                media_thumbnail = entry["media_thumbnail"][0].get("url", "")
+
+            # If still not found, try media_content
+            if not media_thumbnail and "media_content" in entry:
+                for media in entry["media_content"]:
+                    if media.get("medium") == "image" and media.get("type", "").startswith("image/"):
+                        media_thumbnail = media.get("url", "")
+                        break
+
+            # Fallback: try extracting from description
             if not media_thumbnail:
                 media_thumbnail = FeedParser.extract_image_from_html(entry.get("description", ""))
 
+            # Fallback: try extracting from content
             if not media_thumbnail:
                 content = entry.get("content", [{}])[0].get("value", "")
                 media_thumbnail = FeedParser.extract_image_from_html(content)
 
+            # Fallback: try enclosures
             if not media_thumbnail:
                 enclosure = entry.get("enclosures", [])
                 media_thumbnail = enclosure[0].get("url", "") if enclosure else ""
@@ -104,16 +115,16 @@ class FeedParser:
                 article_fetch_tasks.append(FeedParser.fetch_image_from_article(entry.get("link"), session))
             else:
                 article_fetch_tasks.append(None)
-                
+
             items.append(item)
-        
+
         # Fetch all article images in parallel
         if any(task is not None for task in article_fetch_tasks):
             article_images = await asyncio.gather(
                 *[task for task in article_fetch_tasks if task is not None],
                 return_exceptions=True
             )
-            
+
             # Update items with fetched images
             img_index = 0
             for i, item in enumerate(items):
@@ -121,8 +132,9 @@ class FeedParser:
                     if not isinstance(article_images[img_index], Exception):
                         item["media_thumbnail"] = article_images[img_index].replace("&amp;", "&")
                     img_index += 1
-        
+
         return items
+
 
     @staticmethod
     @lru_cache(maxsize=1000)
