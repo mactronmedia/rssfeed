@@ -22,3 +22,6 @@ def get_feed_urls_collection():
 
 def get_feed_news_collection():
     return get_db().feed_news
+
+def get_youtube_feed_collection():
+    return get_db().youtube_feeds

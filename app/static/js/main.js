@@ -1,5 +1,4 @@
 // Refresh news id to get latest news
-
 document.addEventListener('DOMContentLoaded', function() {
     const newsContainer = document.getElementById('news-container');
     
@@ -31,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
     refreshNews();
     
     // Refresh every second (1000ms)
-    setInterval(refreshNews, 1000);
+    setInterval(refreshNews, 100000);
 });
 
 

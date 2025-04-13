@@ -1,4 +1,5 @@
 # api/rss.py
+
 import asyncio
 from typing import Optional
 from fastapi import APIRouter, HTTPException, Query, BackgroundTasks, status
@@ -6,7 +7,12 @@ from app.services.feed_service import FeedService
 from app.services.article_service import ArticleService
 from app.schemas.feed_urls import FeedURLOut
 from app.schemas.feed_news import FeedNewsItem
-from app.crud.feed_urls import FeedURLCRUD  
+from app.crud.feed_urls import FeedURLCRUD
+
+from app.core.youtube_parser import YouTubeFeedParser
+from app.schemas.youtube_feed import YouTubeFeedItem, YouTubeFeedResponse
+from app.crud.youtube_feed import save_youtube_feed_items
+
 
 router = APIRouter(tags=["Feeds & News"])
 
@@ -24,7 +30,6 @@ async def add_feed_url(url: str):
             detail="Invalid RSS feed URL or unable to parse feed"
         )
     return feed_url
-
 
 @router.get("/feeds/items/", response_model=list[FeedNewsItem], tags=["News Items"])
 async def get_feed_items(
@@ -115,3 +120,21 @@ async def periodic_feed_updater(interval_min: int):
             print(f"[FeedUpdater] Fatal error in periodic updater: {e}")
 
         await asyncio.sleep(interval_min * 60)
+
+
+
+@router.get("/feeds/youtube/", response_model=YouTubeFeedResponse, tags=["YouTube Feeds"])
+async def get_youtube_feed(channel_id: str = Query(..., description="YouTube Channel ID")):
+    try:
+        feed_url = f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}"
+        parsed_feed = await YouTubeFeedParser.parse_feed(feed_url)
+
+        # Save to DB
+        await save_youtube_feed_items(parsed_feed.items)
+
+        return parsed_feed
+
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
