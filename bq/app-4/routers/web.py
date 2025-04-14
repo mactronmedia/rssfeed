@@ -1,9 +1,11 @@
+# routers/web.py
+
 from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from app.crud.feed_news import FeedNewsCRUD
 from app.services.feed_service import FeedService
-
+from typing import Optional
 # Initialize the router and templates
 router = APIRouter(tags=["web"])
 templates = Jinja2Templates(directory="app/templates")
@@ -20,7 +22,7 @@ async def fetch_data_for_page():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
+'''
 @router.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     """
@@ -28,8 +30,62 @@ async def index(request: Request):
     """
     context = await fetch_data_for_page()
     return templates.TemplateResponse("index.html", {**context, "request": request})
+'''
 
 
+##### Combined
+@router.get("/", response_class=HTMLResponse)
+async def index(request: Request):
+    """
+    Render index page with sidebar and combined news/video feed.
+    """
+    try:
+        sidebar_feeds = await FeedService.get_all_sidebar_feeds_combined()
+        combined_feed_items = await FeedService.get_combined_feed_items(limit=30)
+
+        return templates.TemplateResponse("index.html", {
+            "request": request,
+            "feeds": sidebar_feeds,
+            "feed_items": combined_feed_items
+        })
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/feeds-sidebar", response_class=HTMLResponse)
+async def get_feeds_sidebar(request: Request):
+    """
+    Returns a combined, alphabetically ordered list of RSS feeds and YouTube channels for the sidebar.
+    """
+    try:
+        feeds = await FeedService.get_all_sidebar_feeds_combined()
+        return templates.TemplateResponse("components/feeds_sidebar.html", {
+            "request": request,
+            "feeds": feeds
+        })
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/combined-feed", response_class=HTMLResponse)
+async def get_combined_feed(request: Request):
+    """
+    Returns the combined feed of news and YouTube videos.
+    """
+    try:
+        combined_feed_items = await FeedService.get_combined_feed_items(limit=20)
+        return templates.TemplateResponse("components/news_list.html", {
+            "request": request,
+            "feed_items": combined_feed_items
+        })
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
+
+
+
+        
 @router.get("/latest-news", response_class=HTMLResponse)
 async def get_latest_news(request: Request):
     """

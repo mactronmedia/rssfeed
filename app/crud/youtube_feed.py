@@ -1,4 +1,4 @@
-# crud/youtube_chanyoutube.py
+# crud/youtube_feed.py
 
 from typing import List
 from pymongo.errors import BulkWriteError
@@ -7,12 +7,7 @@ from app.database.mongo_db import get_youtube_feed_collection, get_youtube_chann
 from app.schemas.youtube_feed import YouTubeFeedItem, YouTubeChannel
 
 
-class YouTubeChannelCRUD:
-    @staticmethod
-    async def get_all_channels():
-        collection = get_youtube_channel_collection()
-        channels = await collection.find().sort("title", 1).to_list(None)
-        return [YouTubeChannel.from_mongo(channel) for channel in channels]
+class YouTubeFeedService:
 
     @staticmethod
     async def save_youtube_channel(channel: YouTubeChannel):
@@ -44,9 +39,3 @@ class YouTubeChannelCRUD:
             print(f"[Mongo] Bulk insert error: {e.details}")
         except Exception as e:
             print(f"[Mongo] Insert failed: {e}")
-
-    @staticmethod
-    async def get_all_youtube_feed_items(limit: int = 30) -> List[YouTubeFeedItem]:
-        collection = get_youtube_feed_collection()
-        items = await collection.find().sort("pubDate", -1).limit(limit).to_list(limit)
-        return [YouTubeFeedItem(**item) for item in items]

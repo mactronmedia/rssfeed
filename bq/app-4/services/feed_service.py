@@ -2,11 +2,12 @@
 
 import aiohttp
 import asyncio
-from typing import Optional
+from typing import Optional, List
 from urllib.parse import urlparse
 from app.core.feed_parser import FeedParser
 from app.crud.feed_urls import FeedURLCRUD
 from app.crud.feed_news import FeedNewsCRUD
+from app.crud.youtube import YouTubeChannelCRUD, YouTubeFeedItemCRUD
 from app.schemas.feed_urls import FeedURLOut
 
 class FeedService:
@@ -120,3 +121,42 @@ class FeedService:
     @staticmethod
     async def get_feed_items(feed_url: str, limit: int = 20):
         return await FeedNewsCRUD.get_news_items_by_feed_url(feed_url, limit)
+
+
+    ## Add RSS feeds and YT channel into one sidebar!
+    @staticmethod
+    async def get_all_sidebar_feeds_combined():
+        rss_feeds = await FeedURLCRUD.get_all_feed_urls()
+        yt_channels = await YouTubeChannelCRUD.get_all_channels()
+
+        # Normalize both RSS and YouTube channels into a shared format
+        combined_feeds = [
+            {**feed.dict(), "type": "rss"} for feed in rss_feeds
+        ] + [
+            {**channel.dict(), "type": "youtube"} for channel in yt_channels
+        ]
+
+        # Sort alphabetically by title
+        combined_feeds.sort(key=lambda x: x["title"].lower())
+
+        return combined_feeds
+
+
+    @staticmethod
+    async def get_combined_feed_items(limit: int = 30) -> List[dict]:
+        # Fetch more than needed from both to ensure mix
+        rss_items = [item.dict() for item in await FeedNewsCRUD.get_all_news(limit=limit * 2)]
+        youtube_items = [item.dict() for item in await YouTubeFeedItemCRUD.get_all_youtube_feed_items(limit=limit * 2)]
+
+        # Tag each item with type
+        for item in rss_items:
+            item["type"] = "rss"
+        for item in youtube_items:
+            item["type"] = "youtube"
+
+        # Combine and sort by pubDate
+        combined = rss_items + youtube_items
+        combined.sort(key=lambda x: x["pubDate"], reverse=True)
+
+        # Return only the first `limit` items
+        return combined[:limit]

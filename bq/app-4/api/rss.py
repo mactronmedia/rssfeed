@@ -8,7 +8,7 @@ from app.services.article_service import ArticleService
 from app.schemas.feed_urls import FeedURLOut
 from app.schemas.feed_news import FeedNewsItem
 from app.crud.feed_urls import FeedURLCRUD
-from app.crud.youtube import YouTubeChannelCRUD
+from app.crud.youtube import YouTubeFeedService
 
 
 from app.core.youtube_parser import YouTubeFeedParser
@@ -98,11 +98,11 @@ async def search_feed_urls(
     return feeds
 
 
-### Update all feeds in DB
 @router.get("/feeds/update-all/", response_model=dict, tags=["Feeds"])
 async def update_all_feeds_periodically(background_tasks: BackgroundTasks, interval_min: int = 5):
     background_tasks.add_task(periodic_feed_updater, interval_min)
     return {"status": "started", "message": f"Feed updates scheduled every {interval_min} minutes"}
+
 
 async def periodic_feed_updater(interval_min: int):
     while True:
@@ -124,19 +124,21 @@ async def periodic_feed_updater(interval_min: int):
 
 
 
-@router.post("/feeds/youtube/", response_model=YouTubeFeedResponse, tags=["YouTube Feeds"])
+@router.get("/feeds/youtube/", response_model=YouTubeFeedResponse, tags=["YouTube Feeds"])
 async def get_youtube_feed(channel_id: str = Query(..., description="YouTube Channel ID")):
     try:
         feed_url = f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}"
         
+        # Unpacking the tuple returned from `parse_feed`
         parsed_feed, channel = await YouTubeFeedParser.parse_feed(feed_url)
 
+        # Ensure that parsed_feed is an instance of YouTubeFeedResponse
         if not isinstance(parsed_feed, YouTubeFeedResponse):
             raise HTTPException(status_code=500, detail="Failed to parse YouTube feed properly.")
 
         # Save to DB
-        await YouTubeChannelCRUD.save_youtube_feed_items(parsed_feed.items)
-        await YouTubeChannelCRUD.save_youtube_channel(channel)  # Save the channel information
+        await YouTubeFeedService.save_youtube_feed_items(parsed_feed.items)
+        await YouTubeFeedService.save_youtube_channel(channel)  # Save the channel information
 
         return parsed_feed
 

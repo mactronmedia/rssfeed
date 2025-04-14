@@ -14,6 +14,7 @@ class YouTubeChannelCRUD:
         channels = await collection.find().sort("title", 1).to_list(None)
         return [YouTubeChannel.from_mongo(channel) for channel in channels]
 
+class YouTubeFeedService:
     @staticmethod
     async def save_youtube_channel(channel: YouTubeChannel):
         try:
@@ -45,6 +46,7 @@ class YouTubeChannelCRUD:
         except Exception as e:
             print(f"[Mongo] Insert failed: {e}")
 
+class YouTubeFeedItemCRUD:
     @staticmethod
     async def get_all_youtube_feed_items(limit: int = 30) -> List[YouTubeFeedItem]:
         collection = get_youtube_feed_collection()
