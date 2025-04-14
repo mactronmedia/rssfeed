@@ -17,11 +17,9 @@ from app.schemas.youtube_feed import YouTubeFeedItem, YouTubeFeedResponse, YouTu
 
 router = APIRouter(tags=["Feeds & News"])
 
-@router.get("/feeds/", response_model=list[FeedURLOut], tags=["Feeds"])
-async def list_feeds():
-    return await FeedService.get_all_feeds()
+ 
 
-@router.post("/feeds/", response_model=FeedURLOut, tags=["Feeds"])
+@router.get("/feeds/", response_model=FeedURLOut, tags=["Feeds"])
 async def add_feed_url(url: str):
     feed_service = FeedService()
     feed_url = await feed_service.add_feed_url(url)
@@ -124,7 +122,7 @@ async def periodic_feed_updater(interval_min: int):
 
 
 
-@router.post("/feeds/youtube/", response_model=YouTubeFeedResponse, tags=["YouTube Feeds"])
+@router.get("/feeds/youtube/", response_model=YouTubeFeedResponse, tags=["YouTube Feeds"])
 async def get_youtube_feed(channel_id: str = Query(..., description="YouTube Channel ID")):
     try:
         feed_url = f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}"
