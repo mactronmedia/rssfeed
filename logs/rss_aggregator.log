@@ -25048,3 +25048,8 @@
 2025-04-14 14:37:02,495 - rss_aggregator - INFO - GET /api/v1/feeds/youtube/ completed with 405 in 0.0002s - [logger.py:106]
 2025-04-14 14:37:23,615 - rss_aggregator - INFO - GET /latest-news completed with 200 in 0.0412s - [logger.py:106]
 2025-04-14 14:38:27,407 - rss_aggregator - INFO - GET /api/v1/feeds/youtube/ completed with 200 in 0.1806s - [logger.py:106]
+2025-04-14 14:38:30,186 - rss_aggregator - INFO - GET /api/v1/feeds/youtube/ completed with 405 in 0.0003s - [logger.py:106]
+2025-04-14 14:38:32,617 - rss_aggregator - INFO - GET /docs completed with 200 in 0.0008s - [logger.py:106]
+2025-04-14 14:38:32,762 - rss_aggregator - INFO - GET /openapi.json completed with 200 in 0.0109s - [logger.py:106]
+2025-04-14 14:38:39,988 - rss_aggregator - INFO - POST /api/v1/feeds/youtube/ completed with 200 in 0.1586s - [logger.py:106]
+2025-04-14 14:39:23,590 - rss_aggregator - INFO - GET /latest-news completed with 200 in 0.0120s - [logger.py:106]
