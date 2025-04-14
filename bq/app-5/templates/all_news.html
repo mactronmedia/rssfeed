@@ -1,0 +1,27 @@
+<!-- app/templates/all_news.html -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All News</title>
+</head>
+<body>
+    <h1>All News</h1>
+    {% if news %}
+        <ul>
+            {% for item in news %}
+                <li>
+                    <h2><a href="{{ item.link }}">{{ item.title }}</a></h2>
+                    <p><strong>Published on:</strong> {{ item.pubDate }}</p>
+                    <p>{{ item.description }}</p>
+                    <p><strong>Source Feed:</strong> {{ item.feed_info.title }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No news found.</p>
+    {% endif %}
+</body>
+</html>
