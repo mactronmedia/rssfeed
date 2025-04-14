@@ -1,0 +1,22 @@
+<!-- components/combined_feed.html -->
+
+{% for item in feed_items %}
+    <div class="feed-item">
+        <h2>{{ item.title }}</h2>
+        <p>{{ item.description }}</p>
+        
+        {% if item.type == 'rss' %}
+            <!-- Display RSS feed item details -->
+            <a href="{{ item.link }}" target="_blank">Read more</a>
+        {% elif item.type == 'youtube' %}
+            <!-- Display YouTube feed item details -->
+            <a href="{{ item.link }}" target="_blank">
+                <img src="{{ item.thumbnail }}" alt="{{ item.title }}">
+                Watch video
+            </a>
+        {% endif %}
+        
+        <!-- Display the pubDate -->
+        <p><small>Published on: {{ item.pubDate.strftime('%Y-%m-%d %H:%M') }}</small></p>
+    </div>
+{% endfor %}

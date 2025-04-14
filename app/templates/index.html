@@ -1,19 +1,8 @@
 {% extends "base.html" %}
 
-{% block title %}Home | RSS Aggregator{% endblock %}
-
-{% block sidebar %}
-    {% include "components/sidebar.html" %}
-{% endblock %}
+{% block title %}Home | RSS + YouTube{% endblock %}
 
 {% block content %}
-    <h2 class="text-2xl sm:text-3xl font-semibold text-white mb-6">Latest News</h2>
-    <!-- News container with specific ID -->
-    <div id="news-container">
-        {% include "components/news_list.html" %}
-    </div>
-{% endblock %}
-
-{% block scripts %}
-<script src="{{ url_for('static', path='/js/main.js') }}"></script>
+    <h1 class="text-2xl font-bold mb-4">Latest News & Videos</h1>
+    {% include 'components/news_list.html' %}
 {% endblock %}

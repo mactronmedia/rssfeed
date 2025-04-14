@@ -1,0 +1,13 @@
+<ul class="feed-list">
+    {% for feed in feeds %}
+        <li>
+            {% if feed.type == "youtube" %}
+                <span>📺</span>
+                <a href="{{ feed.link }}" target="_blank">{{ feed.title }}</a>
+            {% else %}
+                <span>📰</span>
+                <a href="/feed/{{ feed.id }}">{{ feed.title }}</a>
+            {% endif %}
+        </li>
+    {% endfor %}
+</ul>

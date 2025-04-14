@@ -8,7 +8,7 @@ from app.services.article_service import ArticleService
 from app.schemas.feed_urls import FeedURLOut
 from app.schemas.feed_news import FeedNewsItem
 from app.crud.feed_urls import FeedURLCRUD
-from app.crud.youtube_feed import YouTubeFeedService
+from app.crud.youtube import YouTubeFeedService
 
 
 from app.core.youtube_parser import YouTubeFeedParser
