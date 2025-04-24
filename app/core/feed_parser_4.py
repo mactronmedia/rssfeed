@@ -1,6 +1,7 @@
-import requests
 import feedparser
- 
+from pymongo import MongoClient
+from bson.objectid import ObjectId
+
 
 class FeedProcessor:
     @staticmethod
@@ -30,74 +31,73 @@ class FeedProcessor:
 
 
 class VideosModule:
-    @staticmethod
-    def process_video_feed(feed_url, feed_type):
-        print(f"Fetching video from: {feed_url} (type: {feed_type})")
+    client = MongoClient('mongodb://localhost:27017/')  # Connect to MongoDB on localhost
+    db = client['video_database']  # Use a database named "video_database"
+    collection_feeds = db['feeds']  # Use a collection named "feeds"
+    collection_videos = db['videos']  # Use a collection named "videos"
 
     @staticmethod
     def channel_metadata(feed_url, feed_type):
-        feed_type = feed_type
+        channel_id = "UC" + feed.feed.get('yt_channelid', '') # UC = Unique Channel
         channel_name = feed.feed.get('title')
         channel_link = feed.feed.get('link')
-        channel_id = feed.feed.get('yt_channelid')
-        channel_id = "UC" + feed.feed.get('yt_channelid', '') # UC = Unique Channel
+        channel_description = feed.feed.get('description', '') or ''  # fallback to empty string
 
-        print(feed_type)
-        print(channel_name)
-        print(channel_link)
-        print(channel_id)
+        feed_data = {
+            'name': channel_name,
+            'description': channel_description,
+            'type': feed_type,
+            'feed': feed_url,
+        }
+
+        result = VideosModule.collection_feeds.insert_one(feed_data)
+        feed_object_id = result.inserted_id
+        print(f"Inserted feed with id: {feed_object_id}")
 
         if channel_name:
-            VideosModule.video_items(feed_url)
+            VideosModule.video_items(feed_url, feed_object_id)
 
 
     @staticmethod
-    def video_items(feed_url):
-        for entry in feed.entries[:5]:  # Limit to 5 entries
+    def video_items(feed_url, feed_object_id):
+        for entry in feed.entries:
+            video_id = entry.get('yt_videoid')
+            video_link = entry.get('link')
             video_title = entry.get('title', 'No Title')
             video_description = entry.get('description', 'No Description')
             video_published = entry.get('published', 'N/A')
+            channel_id = entry.get('yt_channelid', None)
 
-            thumbnail = (
+            video_thumbnail = (
                 entry.get('media_thumbnail', [{}])[0].get('url') or
                 entry.get('media_content', [{}])[0].get('url') or
                 entry.get('image', None)
             )
 
-            print("Thumbnail:", thumbnail)
-            print(f'Title: {video_title}')
-            #print(f'Description: {video_description}' )
-            print(f'Published: {video_published}')
-            print(thumbnail)
+            video_data = {
+                'feed_id': feed_object_id,
+                'video_id': video_id,
+                'channel_id': channel_id,
+                'title': video_title,
+                'description': video_description,
+                'published': video_published,
+                'thumbnail': video_thumbnail,
+            }
 
-            channel_thubnail =  VideosModule.parse_channel_image(thumbnail)
+            if VideosModule.video_exists(video_id):
+                print(f"Video {video_id} already exists. Skipping.")
+                continue  # Skip duplicates
 
+            result = VideosModule.collection_videos.insert_one(video_data)
+            print(f"Inserted video {video_id} with ID: {result.inserted_id}")
 
+    # Helpers
     @staticmethod
-    def parse_channel_image(feed_url):
-        """
-        Fetch the feed page and parse the image URL using Selectolax.
-        """
-        try:
-            response = requests.get(feed_url)
-            if response.status_code == 200:
-                tree = HTMLParser(response.text)
-                image = tree.css_first('img#img')  # Use CSS selector to find the image by its ID
-                
-                if image:
-                    image_url = image.attributes.get('src')
-                    if image_url:
-                        print(f"Channel Image URL: {image_url}")
-                    else:
-                        print("Image URL not found.")
-                else:
-                    print("No image with the specified ID found.")
-            else:
-                print(f"Failed to fetch feed page, status code: {response.status_code}")
-        except Exception as e:
-            print(f"Error fetching or parsing feed: {e}")
+    def feed_exists(feed_url):
+        return VideosModule.collection_feeds.find_one({'feed': feed_url}) is not None
 
-
+    def video_exists(video_id):
+        return VideosModule.collection_videos.find_one({'video_id': video_id}) is not None
 
 
 class NewsModule:

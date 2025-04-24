@@ -1,0 +1,42 @@
+2025-04-17 02:05:51,589 - INFO - Successfully connected to MongoDB
+2025-04-17 02:05:51,590 - INFO - 
+Processing entry: @veritasium
+2025-04-17 02:05:52,128 - INFO - Feed https://www.youtube.com/feeds/videos.xml?channel_id=UCHnyfMqiRRG1u-2MsSQLbXA already exists. Skipping feed save.
+2025-04-17 02:05:52,151 - INFO - Channel ID : UCHnyfMqiRRG1u-2MsSQLbXA
+2025-04-17 02:05:52,151 - INFO - Feed URL   : https://www.youtube.com/feeds/videos.xml?channel_id=UCHnyfMqiRRG1u-2MsSQLbXA
+2025-04-17 02:05:52,151 - INFO - Source     : html_parsed
+2025-04-17 02:05:52,152 - INFO - 
+Processing entry: https://www.youtube.com/channel/UCsXVk37bltHxD1rDPwtNM8Q
+2025-04-17 02:05:52,682 - INFO - Inserted feed with id: 680045e0f42347cd3807012f
+2025-04-17 02:05:52,693 - INFO - Inserted 15 videos.
+2025-04-17 02:05:52,697 - INFO - Channel ID : UCsXVk37bltHxD1rDPwtNM8Q
+2025-04-17 02:05:52,697 - INFO - Feed URL   : https://www.youtube.com/feeds/videos.xml?channel_id=UCsXVk37bltHxD1rDPwtNM8Q
+2025-04-17 02:05:52,698 - INFO - Source     : html_parsed
+2025-04-17 02:05:52,698 - INFO - 
+Processing entry: https://www.youtube.com/feeds/videos.xml?channel_id=UCsooa4yRKGN_zEE8iknghZA
+2025-04-17 02:05:52,866 - INFO - Inserted feed with id: 680045e0f42347cd3807013f
+2025-04-17 02:05:52,879 - INFO - Inserted 15 videos.
+2025-04-17 02:05:52,883 - INFO - Channel ID : UCsooa4yRKGN_zEE8iknghZA
+2025-04-17 02:05:52,884 - INFO - Feed URL   : https://www.youtube.com/feeds/videos.xml?channel_id=UCsooa4yRKGN_zEE8iknghZA
+2025-04-17 02:05:52,884 - INFO - Source     : direct_rss
+2025-04-17 02:05:52,885 - INFO - MongoDB connection closed
+2025-04-17 02:06:02,446 - INFO - Successfully connected to MongoDB
+2025-04-17 02:06:02,448 - INFO - 
+Processing entry: @veritasium
+2025-04-17 02:06:03,010 - INFO - Feed https://www.youtube.com/feeds/videos.xml?channel_id=UCHnyfMqiRRG1u-2MsSQLbXA already exists. Skipping feed save.
+2025-04-17 02:06:03,015 - INFO - Channel ID : UCHnyfMqiRRG1u-2MsSQLbXA
+2025-04-17 02:06:03,016 - INFO - Feed URL   : https://www.youtube.com/feeds/videos.xml?channel_id=UCHnyfMqiRRG1u-2MsSQLbXA
+2025-04-17 02:06:03,016 - INFO - Source     : html_parsed
+2025-04-17 02:06:03,016 - INFO - 
+Processing entry: https://www.youtube.com/channel/UCsXVk37bltHxD1rDPwtNM8Q
+2025-04-17 02:06:03,602 - INFO - Feed https://www.youtube.com/feeds/videos.xml?channel_id=UCsXVk37bltHxD1rDPwtNM8Q already exists. Skipping feed save.
+2025-04-17 02:06:03,606 - INFO - Channel ID : UCsXVk37bltHxD1rDPwtNM8Q
+2025-04-17 02:06:03,606 - INFO - Feed URL   : https://www.youtube.com/feeds/videos.xml?channel_id=UCsXVk37bltHxD1rDPwtNM8Q
+2025-04-17 02:06:03,607 - INFO - Source     : html_parsed
+2025-04-17 02:06:03,607 - INFO - 
+Processing entry: https://www.youtube.com/feeds/videos.xml?channel_id=UCsooa4yRKGN_zEE8iknghZA
+2025-04-17 02:06:03,786 - INFO - Feed https://www.youtube.com/feeds/videos.xml?channel_id=UCsooa4yRKGN_zEE8iknghZA already exists. Skipping feed save.
+2025-04-17 02:06:03,789 - INFO - Channel ID : UCsooa4yRKGN_zEE8iknghZA
+2025-04-17 02:06:03,790 - INFO - Feed URL   : https://www.youtube.com/feeds/videos.xml?channel_id=UCsooa4yRKGN_zEE8iknghZA
+2025-04-17 02:06:03,790 - INFO - Source     : direct_rss
+2025-04-17 02:06:03,790 - INFO - MongoDB connection closed
