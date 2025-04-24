@@ -235,9 +235,9 @@ class RSSParser:
         no_thumbnail = []
 
         for entry in entries:
-            link = entry.get('link')
-            if not link or link in existing_links:
+            if not await RSSParser.is_valid_entry(entry, existing_links):
                 continue
+
             try:
                 article = await RSSParser.process_entry(entry, feed_id, no_thumbnail)
                 if article:
@@ -246,6 +246,14 @@ class RSSParser:
                 logging.error(f"Error processing entry from {entry.get('link', 'unknown')}: {e}")
         
         return articles, no_thumbnail
+
+    @staticmethod
+    async def is_valid_entry(entry: dict, existing_links: List[str]) -> bool:
+        """Check if an entry is valid (has a link and is not already in the existing links)."""
+        link = entry.get('link')
+        if not link or link in existing_links:
+            return False
+        return True
 
     @staticmethod
     async def process_entry(entry: dict, feed_id: int, no_thumbnail: List[str]) -> Optional[dict]:
