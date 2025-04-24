@@ -153,7 +153,7 @@ class RSSParser:
 
             first_article_language = RSSParser.detect_language(entries[0].get('description', ''))
 
-            feed_id = await RSSParser.get_or_create_feed(url, feed_data, first_article_language)
+            feed_id = await RSSParser.get_feed_data(url, feed_data, first_article_language)
             
             if feed_id:
                 new_articles_added = await RSSParser.process_articles(entries, feed_id, session)
@@ -167,7 +167,7 @@ class RSSParser:
         await Database.update_feed_stats(feed_id, new_articles_added)
 
     @staticmethod
-    async def get_or_create_feed(url: str, feed_data: dict, feed_language: str):
+    async def get_feed_data(url: str, feed_data: dict, feed_language: str):
         existing = await Database.feed_exists(url)
         now = datetime.now(UTC)        
         if existing:
@@ -214,13 +214,10 @@ class RSSParser:
     async def process_articles(entries: List[dict], feed_id: str, session: aiohttp.ClientSession) -> bool:
         all_links = [entry.get('link') for entry in entries if entry.get('link')]
         existing_links = await RSSParser.get_existing_articles(all_links)
-        
         articles, no_thumbnail = await RSSParser.process_entries(entries, feed_id, existing_links)
-
-        await RSSParser.process_thumbnails(articles, no_thumbnail, session)
-
-        inserted_ids = await Database.insert_articles(articles)
         
+        await RSSParser.process_thumbnails(articles, no_thumbnail, session)
+        inserted_ids = await Database.insert_articles(articles)
         return len(inserted_ids) if inserted_ids else 0
 
     @staticmethod
@@ -237,7 +234,6 @@ class RSSParser:
         for entry in entries:
             if not await RSSParser.is_valid_entry(entry, existing_links):
                 continue
-
             try:
                 article = await RSSParser.process_entry(entry, feed_id, no_thumbnail)
                 if article:
@@ -353,12 +349,13 @@ class RSSParser:
         
     @staticmethod
     async def fetch_og_images(urls: List[str], session: aiohttp.ClientSession) -> Dict[str, Optional[str]]:
-        results = await asyncio.gather(*(RSSParser.get_og(u, session) for u in urls))
+        results = await asyncio.gather(*(RSSParser.get_og(url, session) for url in urls))
         return dict(results)
 
     @staticmethod
     async def get_og(url: str, session: aiohttp.ClientSession) -> tuple[str, Optional[str]]:
         try:
+            timeout = aiohttp.ClientTimeout(total=1)  # Set total timeout to 1 second
             logging.info(f'Fetching OG image for {url}')
             async with session.get(url, headers=get_random_headers(), timeout=10) as response:
                 if response.status != 200:
@@ -385,6 +382,46 @@ async def main():
     start_time = time.time()
 
     rss_urls = [
+
+        'https://www.bloomberg.com/politics/feeds/site.xml',
+        'https://www.techradar.com/rss',
+        'https://www.zdnet.com/news/rss.xml',
+        'https://techcrunch.com/feed/',
+        'https://www.technewsworld.com/rss-feed',
+        'https://dig.watch/feed',
+        'https://globalnews.ca/feed/',
+        'https://www.saltwire.com/feed',
+        'https://www.cbc.ca/webfeed/rss/rss-Indigenous',
+        'https://www.cbc.ca/webfeed/rss/rss-technology',
+        'https://www.cbc.ca/webfeed/rss/rss-arts',
+        'https://www.cbc.ca/webfeed/rss/rss-health',
+        'https://www.cbc.ca/webfeed/rss/rss-business',
+        'https://www.cbc.ca/webfeed/rss/rss-politics',
+        'https://www.cbc.ca/webfeed/rss/rss-canada',
+        'https://www.cbc.ca/webfeed/rss/rss-world',
+        'https://www.cbc.ca/webfeed/rss/rss-topstories',
+        'https://feeds.npr.org/1003/rss.xml',
+        'https://feeds.npr.org/1004/rss.xml',
+        'https://feeds.feedburner.com/TheAtlanticWire',
+        'https://time.com/newsfeed/feed/',
+        'https://feeds.feedburner.com/dailykos/zyrjlhwgaef',
+        'https://www.thenation.com/feed/?post_type=article',
+        'https://www.ft.com/rss/home',
+        'https://www.smithsonianmag.com/rss/science-nature/',
+        'https://feeds.feedburner.com/foodsafetynews/mRcs',
+        'https://www.howtogeek.com/feed/',
+        'https://news.yahoo.com/rss/us',
+        'https://www.tmz.com/rss.xml',
+        'https://www.cnet.com/rss/news/',
+        'https://www.cnet.com/rss/how-to/',
+        'https://www.cnet.com/rss/deals/',
+        'https://www.newsweek.com/rss',
+        'https://moxie.foxnews.com/google-publisher/latest.xml',
+        'https://feeds.nbcnews.com/msnbc/public/news',
+        'https://time.com/feed/',
+        'https://www.vice.com/en/feed/',
+        'https://feeds.washingtonpost.com/rss/entertainment',
+        'https://feeds.washingtonpost.com/rss/world',
         'https://www.arabnews.com/rss.xml',
         'https://medium.com/feed/tomtalkspython',
         'https://www.gsmarena.com/rss-news-reviews.php3',
@@ -394,7 +431,39 @@ async def main():
         'https://www.independent.co.uk/rss',
         'https://feeds.bbci.co.uk/news/rss.xml',
         'https://rss.nytimes.com/services/xml/rss/nyt/World.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/Africa.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/Americas.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/AsiaPacific.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/Europe.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/MiddleEast.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/US.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/Education.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/Business.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/EnergyEnvironment.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/SmallBusiness.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/Economy.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/Dealbook.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/MediaandAdvertising.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/YourMoney.xml',
         'https://www.aljazeera.com/xml/rss/all.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/PersonalTech.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/Sports.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/Baseball.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/Science.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/Climate.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/Space.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/Health.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/Well.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/Arts.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/ArtandDesign.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/Books/Review.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/Dance.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/Movies.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/Music.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/Television.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/Theater.xml',
         'https://feeds.skynews.com/feeds/rss/home.xml',
         'https://abcnews.go.com/abcnews/usheadlines',
         'https://www.cbsnews.com/latest/rss/main',
@@ -416,6 +485,7 @@ async def main():
         'https://img.rtvslo.si/feeds/00.xml',
         'https://www.france24.com/fr/rss',
         'https://www.france24.com/es/rss'
+
     ]
     
     semaphore = asyncio.Semaphore(5)  # Limit concurrency to 5 requests at a time

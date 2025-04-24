@@ -338,6 +338,7 @@ async def main():
     start_time = time.time()
 
     rss_urls = [
+        'https://feeds.washingtonpost.com/rss/world',
         'https://www.arabnews.com/rss.xml',
         'https://medium.com/feed/tomtalkspython',
         'https://www.gsmarena.com/rss-news-reviews.php3',

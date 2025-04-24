@@ -281,37 +281,12 @@ async def main():
     start_time = time.time()
 
     rss_urls = [
-        'https://www.arabnews.com/rss.xml',
-        'https://medium.com/feed/tomtalkspython',
-        'https://www.gsmarena.com/rss-news-reviews.php3',
-        'https://www.intelligentcio.com/feed/',
-        'https://www.gamespress.com/News/RSS',
-        'https://qz.com/rss',
-        'https://www.independent.co.uk/rss',
-        'https://feeds.bbci.co.uk/news/rss.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/World.xml',
-        'https://www.aljazeera.com/xml/rss/all.xml',
-        'https://feeds.skynews.com/feeds/rss/home.xml',
-        'https://abcnews.go.com/abcnews/usheadlines',
-        'https://www.cbsnews.com/latest/rss/main',
-        'https://feeds.content.dowjones.io/public/rss/RSSOpinion',
-        'https://feeds.nbcnews.com/nbcnews/public/world',
-        'https://www.newyorker.com/feed/news',
-        'https://www.theguardian.com/us-news/rss',
-        'https://www.latimes.com/world/rss2.0.xml',
-        'https://www.yorkshireeveningpost.co.uk/rss',
-        'https://orthodoxtimes.com/feed/',
-        'https://mashable.com/feeds/rss/all',
-        'https://indianexpress.com/feed/',
-        'https://www.theverge.com/rss/index.xml',
-        'https://arstechnica.com/feed/',
-        'https://www.engadget.com/rss.xml',
-        'https://www.wired.com/feed',
-        'https://www.deutschland.de/en/feed',
-        'https://www.spiegel.de/index.rss',
-        'https://img.rtvslo.si/feeds/00.xml',
-        'https://www.france24.com/fr/rss',
-        'https://www.france24.com/es/rss'
+               'https://rss.nytimes.com/services/xml/rss/nyt/World.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/Africa.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/Americas.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/AsiaPacific.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/Europe.xml',
+        'https://rss.nytimes.com/services/xml/rss/nyt/MiddleEast.xml',
     ]
     
     semaphore = asyncio.Semaphore(5)  # Limit concurrency to 5 requests at a time
