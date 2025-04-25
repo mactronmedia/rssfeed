@@ -389,7 +389,7 @@ async def main():
 
     rss_urls = [
         
-        'https://www.howtogeek.com/feed/'
+        'https://www.howtogeek.com/feed/',
         'https://itsfoss.com/rss/',
         'https://feeds.feedburner.com/MachineLearningMastery',
         'https://kingy.ai/feed/',
@@ -564,7 +564,7 @@ async def main():
         
     ]
 
-    semaphore = asyncio.Semaphore(5)  # Limit concurrency to 5 requests at a time
+    semaphore = asyncio.Semaphore(10)  # Limit concurrency to 5 requests at a time
 
     async with aiohttp.ClientSession() as session:
         await asyncio.gather(*(RSSParser.process_feed(url, session, semaphore) for url in rss_urls))

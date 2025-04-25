@@ -137,11 +137,10 @@ rss/
 
 
 
-
-
-
     rss_urls = [
         
+        'https://www.howtogeek.com/feed/',
+        'https://itsfoss.com/rss/',
         'https://feeds.feedburner.com/MachineLearningMastery',
         'https://kingy.ai/feed/',
         'https://rss.slashdot.org/Slashdot/slashdotLinux',
@@ -161,14 +160,11 @@ rss/
         'https://therecord.media/feed',
         'https://www.securityweek.com/feed/',
         'https://krebsonsecurity.com/feed/',
-        'https://thehackernews.com/feeds/posts/default',
+        'https://feeds.feedburner.com/TheHackersNews',
         'https://www.wpbeginner.com/feed/',
         'http://feeds.searchenginejournal.com/SearchEngineJournal',
         'http://feeds.seroundtable.com/SearchEngineRoundtable1',
-        'https://contentmarketinginstitute.com/blog/feed/',
         'https://moz.com/feeds/blog.rss',
-        'https://www.youtube.com/feeds/videos.xml?channel_id=UCj7v9UM1aGx6GR-nsY-9u8w',
-        'https://feeds.searchengineland.com/searchengineland',
         'https://ahrefs.com/blog/feed/',
         'https://sproutsocial.com/insights/feed/',
         'https://www.convinceandconvert.com/blog/feed/',

@@ -98,8 +98,8 @@ def setup_logging():
         record = old_factory(*args, **kwargs)
         record.emoji = {
             'DEBUG': '🐛',
-            'INFO': 'ℹ️',
-            'WARNING': '⚠️',
+            'INFO': '✔️ ',
+            'WARNING': '⚠️ ',
             'ERROR': '❌',
             'CRITICAL': '🔥',
         }.get(record.levelname, '')
