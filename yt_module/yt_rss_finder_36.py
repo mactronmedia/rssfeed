@@ -7,13 +7,13 @@ import logging
 import random
 import feedparser
 import urllib.parse
+from typing import Optional, Tuple, Dict, Any
 from aiohttp import ClientSession
 from lxml import html as lxml_html
+from selectolax.parser import HTMLParser
+from motor.motor_asyncio import AsyncIOMotorClient
 from bson.objectid import ObjectId
 from utilities.helpers import retry, proxy
-from selectolax.parser import HTMLParser
-from typing import Optional, Tuple, Dict, Any
-from motor.motor_asyncio import AsyncIOMotorClient
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -22,7 +22,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017/')
 
 USER_AGENTS = [ua for ua in os.getenv('USER_AGENTS', "").split(",") if ua.strip()] or [
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
 ]
@@ -58,8 +58,8 @@ class Database:
 
 class YouTubeChannel:
     @staticmethod
-    @retry(retries=3, delay=1, backoff=2, jitter=True)
     @proxy
+    @retry(retries=3, delay=1, backoff=2, jitter=True)
     async def get_channel_info(entry: str, session: aiohttp.ClientSession) -> dict:
         """Retrieve channel info from a given entry (either URL or channel name)."""
 
@@ -110,8 +110,8 @@ class YouTubeChannel:
         return "feeds/videos.xml?channel_id=" in entry
 
     @staticmethod
-    @retry(retries=3, delay=1, backoff=2, jitter=True)
     @proxy
+    @retry(retries=3, delay=1, backoff=2, jitter=True)
     async def process_rss_feed(entry: str, session: ClientSession) -> dict:
         """Process a direct RSS feed entry."""
         channel_id = YouTubeChannel.get_channel_id_from_rss(entry)
@@ -133,8 +133,8 @@ class YouTubeChannel:
         return entry
 
     @staticmethod
-    @retry(retries=3, delay=1, backoff=2, jitter=True)
     @proxy
+    @retry(retries=3, delay=1, backoff=2, jitter=True)
     async def fetch_page(url: str, session: ClientSession) -> str:
         """Fetch page content, handling consent form if needed."""
         try:
@@ -154,8 +154,8 @@ class YouTubeChannel:
             return None
 
     @staticmethod
-    @retry(retries=3, delay=1, backoff=2, jitter=True)
     @proxy
+    @retry(retries=3, delay=1, backoff=2, jitter=True)
     async def handle_consent(session: ClientSession, html: str) -> str:
         """Handle YouTube consent form using selectolax."""
         try:
@@ -325,8 +325,8 @@ class ImageExtractor:
         return None
 
     @staticmethod
-    @retry(retries=3, delay=1, backoff=2, jitter=True)
     @proxy
+    @retry(retries=3, delay=1, backoff=2, jitter=True)
     async def get_channel_avatar(channel_url_or_id: str, session: ClientSession, preferred_size: int = 240) -> Optional[str]:
 
         # Normalize the input URL
@@ -355,8 +355,8 @@ class ImageExtractor:
 
 class YouTubeParser:
     @staticmethod
-    @retry(retries=3, delay=1, backoff=2, jitter=True)
     @proxy
+    @retry(retries=3, delay=1, backoff=2, jitter=True)
     async def channel_data(feed_url: str, session: ClientSession):
         feed = feedparser.parse(feed_url)
         feed_object_id = await YouTubeParser.get_or_create_feed(feed_url, feed, session)
@@ -397,7 +397,7 @@ class YouTubeParser:
             'name': channel_name,
             'description': channel_description,
             'type': 'video',
-            'language': 'en-us',
+            'language': 'en',
             'feed': feed_url,
             'avatar_url': avatar_url,
         }
@@ -407,8 +407,8 @@ class YouTubeParser:
         return result.inserted_id
 
     @staticmethod
-    @retry(retries=3, delay=1, backoff=2, jitter=True)
     @proxy
+    @retry(retries=3, delay=1, backoff=2, jitter=True)
     async def video_items(feed, session: ClientSession, feed_object_id):
         tasks = []
         
@@ -444,6 +444,7 @@ class YouTubeParser:
         }
 
 async def main():
+    # Create a single session that can be used throughout
     async with aiohttp.ClientSession(headers=headers) as session:
         entry = 'https://www.youtube.com/@LinusTechTips'
         result = await YouTubeChannel.get_channel_info(entry, session)
