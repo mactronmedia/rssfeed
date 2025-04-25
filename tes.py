@@ -1,32 +1,39 @@
 import requests
 from bs4 import BeautifulSoup
+import random
+import time
 
-url = "https://www.washingtonpost.com/world/2025/04/22/pope-francis-funeral-who-will-attend/"
+url = "https://www.washingtonpost.com/nation/2025/04/24/bmw-trump-trade-tariffs-south-carolina-spartanburg/"
+
+user_agents = [
+    # Add more if needed
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.1 Safari/605.1.15',
+]
+
+proxies = {
+    "http": "http://gwjzgcjy-rotate:sy8mv03i745k@p.webshare.io:80",
+    "https": "http://gwjzgcjy-rotate:sy8mv03i745k@p.webshare.io:80"
+}
 
 headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    'User-Agent': random.choice(user_agents)
 }
 
 try:
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, timeout=10)
     response.raise_for_status()
     soup = BeautifulSoup(response.text, 'html.parser')
+    print(soup.prettify())
 
-    # Method 1: Extract from figure element (specific to your example)
-    figure = soup.find('figure', class_='wpds-c-dsRDLm')
-    if figure:
-        img = figure.find('img')
-        if img and 'srcset' in img.attrs:
-            # Get the first (largest) image from srcset
-            image_url = img['srcset'].split(',')[0].split(' ')[0]
-            print("Article main image:", image_url)
-    
-    # Method 2: Alternative approach to get og:image as fallback
+        # Method 2: Alternative approach to get og:image as fallback
     og_image = soup.find('meta', property='og:image')
     if og_image:
         print("og:image:", og_image['content'])
 
+except requests.exceptions.SSLError:
+    print("SSL handshake failed — site may be blocking the proxy.")
+except requests.exceptions.ProxyError:
+    print("Proxy worked, but was likely blocked by the target site.")
 except requests.exceptions.RequestException as e:
-    print(f"Error fetching the URL: {e}")
-except Exception as e:
-    print(f"An error occurred: {e}")
+    print(f"General request error: {e}")

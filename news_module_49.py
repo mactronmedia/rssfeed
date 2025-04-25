@@ -13,12 +13,13 @@ from selectolax.parser import HTMLParser
 from typing import Optional, Dict, Any, List
 from langdetect import detect, LangDetectException
 from motor.motor_asyncio import AsyncIOMotorClient
-from utilities.helpers import proxy, retry
+from utilities.helpers import setup_logging, proxy, retry
+
 
 # --------------------------
 # Configuration and Constants
 # --------------------------
-
+setup_logging()  #
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 TYPE = 'news'
@@ -383,6 +384,34 @@ async def main():
 
     rss_urls = [
 
+        'https://www.pcmag.com/feeds/rss/latest',
+        'https://www.tomsguide.com/feeds.xml',
+        'https://www.gamingonlinux.com/article_rss.php',
+        'https://www.maketecheasier.com/feed/',
+        'https://www.networkworld.com/feed/',
+        'https://linuxconfig.org/feed',
+        'https://www.rosehosting.com/blog/feed/',
+        'https://bashscript.net/feed/',
+        'https://linuxgizmos.com/feed/',
+        'https://9to5linux.com/feed',
+        'https://fedoramagazine.org/feed/',
+        'https://fossforce.com/feed',
+        'https://www.rosehosting.com/blog/feed/',
+        'https://www.phoronix.com/rss.php',
+        'https://linuxiac.com/feed/',
+        'https://www.linuxjournal.com/node/feed',
+        'https://lxer.com/module/newswire/headlines.rss',
+        'https://www.wpbeginner.com/feed/',
+        'https://www.index.hr/rss/magazin',
+        'https://www.index.hr/rss/sport',
+        'https://www.index.hr/rss/vijesti-novac',
+        'https://www.index.hr/rss/vijesti-hrvatska',
+        'https://www.index.hr/rss/vijesti-znanost',
+        'https://www.index.hr/rss/vijesti-svijet',
+        'https://www.index.hr/rss/vijesti',
+        'https://www.index.hr/rss/najcitanije',
+        'https://www.index.hr/rss',
+        'https://www.websiteplanet.com/feed/',
         'https://dnevnik.hr/assets/feed/articles',
         'https://www.bloomberg.com/politics/feeds/site.xml',
         'https://www.techradar.com/rss',

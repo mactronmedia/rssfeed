@@ -2,8 +2,9 @@ import os
 import aiohttp
 import asyncio
 import random
-import functools
 import logging
+import colorlog
+import functools
 from functools import wraps
 from urllib.parse import urlparse
 from aiohttp import ClientSession, ClientTimeout
@@ -72,3 +73,36 @@ def retry(retries=3, delay=1, backoff=2, jitter=True, exceptions=(Exception,)):
         return wrapper
     return decorator
 
+
+def setup_logging():
+    handler = colorlog.StreamHandler()
+    handler.setFormatter(colorlog.ColoredFormatter(
+        "%(asctime)s - %(log_color)s%(levelname)s %(emoji)s - %(message)s",
+        log_colors={
+            'DEBUG':    'cyan',
+            'INFO':     'green',
+            'WARNING':  'yellow',
+            'ERROR':    'red',
+            'CRITICAL': 'bold_red',
+        },
+        reset=True  # Reset color after each message
+    ))
+
+    logging.root.handlers = []
+    logging.basicConfig(level=logging.INFO, handlers=[handler])
+
+    # Add emojis per log level
+    old_factory = logging.getLogRecordFactory()
+
+    def record_factory(*args, **kwargs):
+        record = old_factory(*args, **kwargs)
+        record.emoji = {
+            'DEBUG': '🐛',
+            'INFO': 'ℹ️',
+            'WARNING': '⚠️',
+            'ERROR': '❌',
+            'CRITICAL': '🔥',
+        }.get(record.levelname, '')
+        return record
+
+    logging.setLogRecordFactory(record_factory)

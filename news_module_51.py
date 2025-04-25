@@ -13,12 +13,13 @@ from selectolax.parser import HTMLParser
 from typing import Optional, Dict, Any, List
 from langdetect import detect, LangDetectException
 from motor.motor_asyncio import AsyncIOMotorClient
-from utilities.helpers import proxy, retry
+from utilities.helpers import setup_logging, proxy, retry
+
 
 # --------------------------
 # Configuration and Constants
 # --------------------------
-
+setup_logging()  #
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 TYPE = 'news'
@@ -382,7 +383,76 @@ async def main():
     start_time = time.time()
 
     rss_urls = [
-
+        
+        'https://www.howtogeek.com/feed/',
+        'https://itsfoss.com/rss/',
+        'https://feeds.feedburner.com/MachineLearningMastery',
+        'https://kingy.ai/feed/',
+        'https://rss.slashdot.org/Slashdot/slashdotLinux',
+        'https://feeds.feedburner.com/d0od',
+        'https://feeds.feedburner.com/Phoronix',
+        'https://www.ubuntu.com/rss.xml',
+        'http://lxer.com/module/newswire/headlines.rss',
+        'https://www.howtoforge.com/node/feed',
+        'https://feeds.feedburner.com/ItsFoss',
+        'https://www.tecmint.com/feed/',
+        'https://www.cnet.com/rss/news/',
+        'https://www.digitaltrends.com/feed/',
+        'https://www.makeuseof.com/feed/',
+        'https://lifehacker.com/feed',
+        'https://www.engadget.com/rss.xml',
+        'https://feeds.arstechnica.com/arstechnica/index',
+        'https://therecord.media/feed',
+        'https://www.securityweek.com/feed/',
+        'https://krebsonsecurity.com/feed/',
+        'https://feeds.feedburner.com/TheHackersNews',
+        'https://www.wpbeginner.com/feed/',
+        'http://feeds.searchenginejournal.com/SearchEngineJournal',
+        'http://feeds.seroundtable.com/SearchEngineRoundtable1',
+        'https://moz.com/feeds/blog.rss',
+        'https://ahrefs.com/blog/feed/',
+        'https://sproutsocial.com/insights/feed/',
+        'https://www.convinceandconvert.com/blog/feed/',
+        'https://www.getresponse.com/blog/feed',
+        'https://www.searchenginewatch.com/feed/',
+        'https://learn.g2.com/rss.xml',
+        'https://www.demandsage.com/feed/',
+        'https://www.socialmediaexaminer.com/feed/',
+        'https://www.intentsify.io/blog/rss.xml',
+        'https://copyblogger.com/feed/',
+        'https://diymarketers.com/feed/',
+        'https://elitedigitalagency.com/blog/feed/',
+        'https://www.smartinsights.com/blog/feed/',
+        'https://www.semrush.com/blog/feed/',
+        'https://verticalresponse.com/feed/',
+        'https://www.reachfirst.com/feed/',
+        'https://neilpatel.com/blog/feed/',
+        'https://www.developernation.net/rss.xml',
+        'https://www.pcmag.com/feeds/rss/latest',
+        'https://www.tomsguide.com/feeds.xml',
+        'https://www.gamingonlinux.com/article_rss.php',
+        'https://www.maketecheasier.com/feed/',
+        'https://www.networkworld.com/feed/',
+        'https://linuxconfig.org/feed',
+        'https://www.rosehosting.com/blog/feed/',
+        'https://bashscript.net/feed/',
+        'https://linuxgizmos.com/feed/',
+        'https://9to5linux.com/feed',
+        'https://fedoramagazine.org/feed/',
+        'https://fossforce.com/feed',
+        'https://www.phoronix.com/rss.php',
+        'https://linuxiac.com/feed/',
+        'https://www.linuxjournal.com/node/feed',
+        'https://www.index.hr/rss/magazin',
+        'https://www.index.hr/rss/sport',
+        'https://www.index.hr/rss/vijesti-novac',
+        'https://www.index.hr/rss/vijesti-hrvatska',
+        'https://www.index.hr/rss/vijesti-znanost',
+        'https://www.index.hr/rss/vijesti-svijet',
+        'https://www.index.hr/rss/vijesti',
+        'https://www.index.hr/rss/najcitanije',
+        'https://www.index.hr/rss',
+        'https://www.websiteplanet.com/feed/',
         'https://dnevnik.hr/assets/feed/articles',
         'https://www.bloomberg.com/politics/feeds/site.xml',
         'https://www.techradar.com/rss',
@@ -486,9 +556,9 @@ async def main():
         'https://img.rtvslo.si/feeds/00.xml',
         'https://www.france24.com/fr/rss',
         'https://www.france24.com/es/rss'
-
+        
     ]
-    
+
     semaphore = asyncio.Semaphore(5)  # Limit concurrency to 5 requests at a time
 
     async with aiohttp.ClientSession() as session:
