@@ -418,7 +418,6 @@ class YouTubeParser:
         results = await asyncio.gather(*tasks)
 
         video_data_list = [res for res in results if res]
-
         if video_data_list:
             await Database.bulk_insert_videos(video_data_list)
 
