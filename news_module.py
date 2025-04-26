@@ -8,6 +8,7 @@ import asyncio
 import logging
 import random
 import feedparser
+from dateutil import parser
 from datetime import datetime, UTC 
 from selectolax.parser import HTMLParser
 from typing import Optional, Dict, Any, List
@@ -44,6 +45,7 @@ def get_random_headers() -> dict:
         "Accept-Language": "en-US,en;q=0.5",
     }
     return headers
+
 
 # --------------------------
 # Database Operations
@@ -285,10 +287,31 @@ class RSSParser:
             'thumbnail': thumbnail,
         }
 
+    '''
+    @staticmethod
+    def get_published_date(entry: dict) -> str:
+        date_fields = ['published', 'updated', 'dc_date', 'pubDate']
+        
+        for field in date_fields:
+            date_value = entry.get(field)
+            if date_value:
+                try:
+                    # Parse with timezone awareness
+                    dt = parser.parse(date_value)
+                    # Return ISO format with timezone (will include +00:00 for +0000)
+                    return dt.isoformat()
+                except (ValueError, TypeError) as e:
+                    print(f"Error parsing {field} '{date_value}': {e}")
+                    continue
+        
+        return 'N/A'
+    '''
+
     @staticmethod
     def get_published_date(entry: dict) -> datetime:
         published_parsed = entry.get("published_parsed")
-        return datetime(*published_parsed[:6]) if published_parsed else datetime.now(UTC)
+        return datetime(*published_parsed[:6]) if published_parsed else 'datetime.now(UTC)'
+ 
 
     @staticmethod
     async def process_thumbnails(articles: List[dict], no_thumbnail: List[str], session: aiohttp.ClientSession) -> None:
@@ -388,180 +411,12 @@ async def main():
 
     rss_urls = [
         
-        'https://www.howtogeek.com/feed/',
-        'https://itsfoss.com/rss/',
-        'https://feeds.feedburner.com/MachineLearningMastery',
-        'https://kingy.ai/feed/',
-        'https://rss.slashdot.org/Slashdot/slashdotLinux',
-        'https://feeds.feedburner.com/d0od',
-        'https://feeds.feedburner.com/Phoronix',
-        'https://www.ubuntu.com/rss.xml',
-        'http://lxer.com/module/newswire/headlines.rss',
-        'https://www.howtoforge.com/node/feed',
-        'https://feeds.feedburner.com/ItsFoss',
-        'https://www.tecmint.com/feed/',
-        'https://www.cnet.com/rss/news/',
-        'https://www.digitaltrends.com/feed/',
-        'https://www.makeuseof.com/feed/',
-        'https://lifehacker.com/feed',
-        'https://www.engadget.com/rss.xml',
-        'https://feeds.arstechnica.com/arstechnica/index',
-        'https://therecord.media/feed',
-        'https://www.securityweek.com/feed/',
-        'https://krebsonsecurity.com/feed/',
-        'https://feeds.feedburner.com/TheHackersNews',
-        'https://www.wpbeginner.com/feed/',
-        'http://feeds.searchenginejournal.com/SearchEngineJournal',
-        'http://feeds.seroundtable.com/SearchEngineRoundtable1',
-        'https://moz.com/feeds/blog.rss',
-        'https://ahrefs.com/blog/feed/',
-        'https://sproutsocial.com/insights/feed/',
-        'https://www.convinceandconvert.com/blog/feed/',
-        'https://www.getresponse.com/blog/feed',
-        'https://www.searchenginewatch.com/feed/',
-        'https://learn.g2.com/rss.xml',
-        'https://www.demandsage.com/feed/',
-        'https://www.socialmediaexaminer.com/feed/',
-        'https://www.intentsify.io/blog/rss.xml',
-        'https://copyblogger.com/feed/',
-        'https://diymarketers.com/feed/',
-        'https://elitedigitalagency.com/blog/feed/',
-        'https://www.smartinsights.com/blog/feed/',
-        'https://www.semrush.com/blog/feed/',
-        'https://verticalresponse.com/feed/',
-        'https://www.reachfirst.com/feed/',
-        'https://neilpatel.com/blog/feed/',
-        'https://www.developernation.net/rss.xml',
-        'https://www.pcmag.com/feeds/rss/latest',
-        'https://www.tomsguide.com/feeds.xml',
-        'https://www.gamingonlinux.com/article_rss.php',
-        'https://www.maketecheasier.com/feed/',
-        'https://www.networkworld.com/feed/',
-        'https://linuxconfig.org/feed',
-        'https://www.rosehosting.com/blog/feed/',
-        'https://bashscript.net/feed/',
-        'https://linuxgizmos.com/feed/',
-        'https://9to5linux.com/feed',
-        'https://fedoramagazine.org/feed/',
-        'https://fossforce.com/feed',
-        'https://www.phoronix.com/rss.php',
-        'https://linuxiac.com/feed/',
-        'https://www.linuxjournal.com/node/feed',
-        'https://www.index.hr/rss/magazin',
-        'https://www.index.hr/rss/sport',
-        'https://www.index.hr/rss/vijesti-novac',
-        'https://www.index.hr/rss/vijesti-hrvatska',
-        'https://www.index.hr/rss/vijesti-znanost',
-        'https://www.index.hr/rss/vijesti-svijet',
-        'https://www.index.hr/rss/vijesti',
-        'https://www.index.hr/rss/najcitanije',
-        'https://www.index.hr/rss',
-        'https://www.websiteplanet.com/feed/',
-        'https://dnevnik.hr/assets/feed/articles',
-        'https://www.bloomberg.com/politics/feeds/site.xml',
-        'https://www.techradar.com/rss',
-        'https://www.zdnet.com/news/rss.xml',
-        'https://techcrunch.com/feed/',
-        'https://www.technewsworld.com/rss-feed',
-        'https://dig.watch/feed',
-        'https://globalnews.ca/feed/',
-        'https://www.saltwire.com/feed',
-        'https://www.cbc.ca/webfeed/rss/rss-Indigenous',
-        'https://www.cbc.ca/webfeed/rss/rss-technology',
-        'https://www.cbc.ca/webfeed/rss/rss-arts',
-        'https://www.cbc.ca/webfeed/rss/rss-health',
-        'https://www.cbc.ca/webfeed/rss/rss-business',
-        'https://www.cbc.ca/webfeed/rss/rss-politics',
-        'https://www.cbc.ca/webfeed/rss/rss-canada',
-        'https://www.cbc.ca/webfeed/rss/rss-world',
-        'https://www.cbc.ca/webfeed/rss/rss-topstories',
-        'https://feeds.npr.org/1003/rss.xml',
-        'https://feeds.npr.org/1004/rss.xml',
-        'https://feeds.feedburner.com/TheAtlanticWire',
-        'https://time.com/newsfeed/feed/',
-        'https://feeds.feedburner.com/dailykos/zyrjlhwgaef',
-        'https://www.thenation.com/feed/?post_type=article',
-        'https://www.ft.com/rss/home',
-        'https://www.smithsonianmag.com/rss/science-nature/',
-        'https://feeds.feedburner.com/foodsafetynews/mRcs',
-        'https://www.howtogeek.com/feed/',
-        'https://news.yahoo.com/rss/us',
-        'https://www.tmz.com/rss.xml',
-        'https://www.cnet.com/rss/news/',
-        'https://www.cnet.com/rss/how-to/',
-        'https://www.cnet.com/rss/deals/',
-        'https://www.newsweek.com/rss',
-        'https://moxie.foxnews.com/google-publisher/latest.xml',
-        'https://feeds.nbcnews.com/msnbc/public/news',
-        'https://time.com/feed/',
-        'https://www.vice.com/en/feed/',
-        'https://feeds.washingtonpost.com/rss/entertainment',
-        'https://feeds.washingtonpost.com/rss/world',
-        'https://www.arabnews.com/rss.xml',
-        'https://medium.com/feed/tomtalkspython',
-        'https://www.gsmarena.com/rss-news-reviews.php3',
-        'https://www.intelligentcio.com/feed/',
-        'https://www.gamespress.com/News/RSS',
-        'https://qz.com/rss',
-        'https://www.independent.co.uk/rss',
-        'https://feeds.bbci.co.uk/news/rss.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/World.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/Africa.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/Americas.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/AsiaPacific.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/Europe.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/MiddleEast.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/US.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/Education.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/Business.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/EnergyEnvironment.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/SmallBusiness.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/Economy.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/Dealbook.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/MediaandAdvertising.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/YourMoney.xml',
-        'https://www.aljazeera.com/xml/rss/all.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/PersonalTech.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/Sports.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/Baseball.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/Science.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/Climate.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/Space.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/Health.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/Well.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/Arts.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/ArtandDesign.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/Books/Review.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/Dance.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/Movies.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/Music.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/Television.xml',
-        'https://rss.nytimes.com/services/xml/rss/nyt/Theater.xml',
-        'https://feeds.skynews.com/feeds/rss/home.xml',
-        'https://abcnews.go.com/abcnews/usheadlines',
-        'https://www.cbsnews.com/latest/rss/main',
-        'https://feeds.content.dowjones.io/public/rss/RSSOpinion',
-        'https://feeds.nbcnews.com/nbcnews/public/world',
-        'https://www.newyorker.com/feed/news',
-        'https://www.theguardian.com/us-news/rss',
-        'https://www.latimes.com/world/rss2.0.xml',
-        'https://www.yorkshireeveningpost.co.uk/rss',
-        'https://orthodoxtimes.com/feed/',
-        'https://mashable.com/feeds/rss/all',
-        'https://indianexpress.com/feed/',
-        'https://www.theverge.com/rss/index.xml',
-        'https://arstechnica.com/feed/',
-        'https://www.engadget.com/rss.xml',
-        'https://www.wired.com/feed',
-        'https://www.deutschland.de/en/feed',
-        'https://www.spiegel.de/index.rss',
-        'https://img.rtvslo.si/feeds/00.xml',
-        'https://www.france24.com/fr/rss',
-        'https://www.france24.com/es/rss'
+                'https://www.tmz.com/rss.xml',
+                'https://www.arabnews.com/rss.xml',
+    
         
     ]
+
 
     semaphore = asyncio.Semaphore(10)  # Limit concurrency to 5 requests at a time
 

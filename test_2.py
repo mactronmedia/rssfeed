@@ -69,7 +69,7 @@ class Database:
         return existing_links
 
     @staticmethod
-    async def insert_articles(docs: List[Dict[str, Any]]) -> List[Any]:
+    async def insert_news(docs: List[Dict[str, Any]]) -> List[Any]:
         if docs:
             res = await Database.articles.insert_many(docs)
             logging.info(f"Inserted {len(res.inserted_ids)} news.")
@@ -104,6 +104,12 @@ class Database:
 # --------------------------
 
 class RSSParser:
+    @staticmethod
+    def detect_language(text: str) -> str:
+        try:
+            return detect(text)
+        except LangDetectException:
+            return "unknown"
 
     @staticmethod
     @retry(retries=3, delay=1, backoff=2, jitter=True)
@@ -138,26 +144,26 @@ class RSSParser:
                 return
 
             feed_id = feed['_id']
-            new_news_added = await RSSParser.process_articles(entries, feed_id, session)
+            new_news_added = await RSSParser.process_articles(entries, feed_id, feed['language'], session)
             
             if new_news_added:
                 await Database.update_feed_last_updated(feed_id, datetime.now(UTC))
                 await Database.update_feed_stats(feed_id, new_news_added)
             
             await Database.update_feed_last_checked(feed_id, datetime.now(UTC))
-
+        
     @staticmethod
-    async def process_articles(entries: List[dict], feed_id: str, session: aiohttp.ClientSession) -> bool:
+    async def process_articles(entries: List[dict], feed_id: str, feed_language: str, session: aiohttp.ClientSession) -> bool:
         all_links = [entry.get('link') for entry in entries if entry.get('link')]
         existing_links = await Database.article_exists(all_links)
-        news, no_thumbnail = await RSSParser.process_entries(entries, feed_id, existing_links)
+        news, no_thumbnail = await RSSParser.process_entries(entries, feed_id, feed_language, existing_links)
         
         await RSSParser.process_thumbnails(news, no_thumbnail, session)
-        inserted_ids = await Database.insert_articles(news)
+        inserted_ids = await Database.insert_news(news)
         return len(inserted_ids) if inserted_ids else 0
 
     @staticmethod
-    async def process_entries(entries: List[dict], feed_id: str, existing_links: List[str]) -> tuple[List[dict], List[str]]:
+    async def process_entries(entries: List[dict], feed_id: str, feed_language: str, existing_links: List[str]) -> tuple[List[dict], List[str]]:
         news = []
         no_thumbnail = []
 
@@ -165,7 +171,7 @@ class RSSParser:
             if not await RSSParser.is_valid_entry(entry, existing_links):
                 continue
             try:
-                article = await RSSParser.process_entry(entry, feed_id, no_thumbnail)
+                article = await RSSParser.process_entry(entry, feed_id, feed_language, no_thumbnail)
                 if article:
                     news.append(article)
             except Exception as e:
@@ -181,14 +187,20 @@ class RSSParser:
         return True
 
     @staticmethod
-    async def process_entry(entry: dict, feed_id: int, no_thumbnail: List[str]) -> Optional[dict]:
+    async def process_entry(entry: dict, feed_id: int, feed_language: str, no_thumbnail: List[str]) -> Optional[dict]:
         link = entry.get('link')
         if not link:
             return None
             
         description = entry.get('description', '')
         published = RSSParser.get_published_date(entry)
-    
+        
+        # Try to detect language from description, fall back to feed language
+        try:
+            article_language = RSSParser.detect_language(description) if description else feed_language
+        except:
+            article_language = feed_language
+            
         thumbnail = RSSParser.get_thumbnail(entry, description, no_thumbnail)
 
         return {
@@ -197,7 +209,7 @@ class RSSParser:
             'description': RSSParser.clean_html(description),
             'content': '',
             'summarize': '',
-            'language': '',
+            'language': article_language,
             'published': published,
             'link': link,
             'thumbnail': thumbnail,
@@ -298,7 +310,7 @@ class RSSParser:
 # --------------------------
 
 async def main():
-    semaphore = asyncio.Semaphore(10)  # Limit concurrent requests
+    semaphore = asyncio.Semaphore(20)  # Limit concurrent requests
     async with aiohttp.ClientSession() as session:
         feeds = await Database.get_all_feeds()
         tasks = [RSSParser.process_feed(feed, session, semaphore) for feed in feeds]

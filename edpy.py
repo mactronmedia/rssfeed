@@ -8,6 +8,7 @@ import asyncio
 import logging
 import random
 import feedparser
+import atoma
 from datetime import datetime, UTC 
 from selectolax.parser import HTMLParser
 from typing import Optional, Dict, Any, List
@@ -119,14 +120,65 @@ class RSSParser:
             async with session.get(url, headers=get_random_headers()) as response:
                 if response.status != 200:
                     return {"error": f"HTTP {response.status}"}
-                data = feedparser.parse(await response.text())
-
-                if data.bozo:
-                    return {"error": str(data.bozo_exception)}
-                                
-                return {"feed": data.feed, "entries": data.entries}
+                
+                text = await response.text()
+                
+                # First try to parse with atoma
+                try:
+                    feed_bytes = text.encode('utf-8')
+                    feed = atoma.parse_atom_bytes(feed_bytes) if 'atom' in response.headers.get('content-type', '').lower() else atoma.parse_rss_bytes(feed_bytes)
+                    return {"feed": RSSParser.convert_atoma_feed(feed), "entries": RSSParser.convert_atoma_entries(feed)}
+                except Exception as atoma_error:
+                    logging.info(f"Atoma parsing failed, falling back to feedparser: {atoma_error}")
+                    # If atoma fails, fall back to feedparser
+                    data = feedparser.parse(text)
+                    if data.bozo:
+                        return {"error": str(data.bozo_exception)}
+                    return {"feed": data.feed, "entries": data.entries}
         except Exception as e:
             return {"error": str(e)}
+
+    @staticmethod
+    def convert_atoma_feed(feed) -> Dict[str, Any]:
+        """Convert atoma feed object to dictionary similar to feedparser's format"""
+        if hasattr(feed, 'title'):  # RSS feed
+            return {
+                'title': feed.title,
+                'link': feed.link,
+                'description': getattr(feed, 'description', ''),
+                'language': getattr(feed, 'language', ''),
+            }
+        else:  # Atom feed
+            return {
+                'title': feed.title.value,
+                'link': feed.links[0].href if feed.links else '',
+                'subtitle': getattr(feed, 'subtitle', ''),
+            }
+
+    @staticmethod
+    def convert_atoma_entries(feed) -> List[Dict[str, Any]]:
+        """Convert atoma entries to list of dictionaries similar to feedparser's format"""
+        entries = []
+        for entry in feed.items:
+            if hasattr(entry, 'title'):  # RSS entry
+                entries.append({
+                    'title': entry.title,
+                    'link': entry.link,
+                    'description': getattr(entry, 'description', ''),
+                    'published': getattr(entry, 'pub_date', None),
+                    'published_parsed': getattr(entry, 'pub_date', None).timetuple() if hasattr(entry, 'pub_date') else None,
+                    'enclosures': [{'href': enc.url, 'type': enc.type} for enc in getattr(entry, 'enclosures', [])],
+                })
+            else:  # Atom entry
+                entries.append({
+                    'title': entry.title.value,
+                    'link': entry.links[0].href if entry.links else '',
+                    'description': getattr(entry, 'summary', ''),
+                    'published': entry.published,
+                    'published_parsed': entry.published.timetuple() if entry.published else None,
+                    'content': [{'value': entry.content.value} if hasattr(entry, 'content') else {}],
+                })
+        return entries
 
     @staticmethod
     async def process_feed(feed: Dict[str, Any], session: aiohttp.ClientSession, semaphore: asyncio.Semaphore):
@@ -310,7 +362,7 @@ class RSSParser:
 # --------------------------
 
 async def main():
-    semaphore = asyncio.Semaphore(20)  # Limit concurrent requests
+    semaphore = asyncio.Semaphore(10)  # Limit concurrent requests
     async with aiohttp.ClientSession() as session:
         feeds = await Database.get_all_feeds()
         tasks = [RSSParser.process_feed(feed, session, semaphore) for feed in feeds]
