@@ -126,7 +126,6 @@ class RSSParser:
     async def process_feed(feed: Dict[str, Any], session: aiohttp.ClientSession, semaphore: asyncio.Semaphore):
         async with semaphore:
             url = feed['feed']
-
             result = await RSSParser.fetch_feed(url, session)
             if "error" in result:
                 logging.error(f"Feed error {url}: {result['error']}")
@@ -138,13 +137,17 @@ class RSSParser:
                 return
 
             feed_id = feed['_id']
-            new_news_added = await RSSParser.process_articles(entries, feed_id, session)
+            new_articles_added = await RSSParser.process_articles(entries, feed_id, session)
             
-            if new_news_added:
-                await Database.update_feed_last_updated(feed_id, datetime.now(UTC))
-                await Database.update_feed_stats(feed_id, new_news_added)
+            if new_articles_added:
+                new_articles_added = await RSSParser.process_articles(entries, feed_id, session)
             
             await Database.update_feed_last_checked(feed_id, datetime.now(UTC))
+
+    @staticmethod
+    async def update_feed_and_stats(feed_id: Any, new_articles_added: int) -> None:
+        await Database.update_feed_last_updated(feed_id, datetime.now(UTC))
+        await Database.update_feed_stats(feed_id, new_articles_added)
 
     @staticmethod
     async def process_articles(entries: List[dict], feed_id: str, session: aiohttp.ClientSession) -> bool:
