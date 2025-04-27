@@ -40,9 +40,16 @@ USER_AGENTS = [ua.strip() for ua in os.getenv('USER_AGENTS', '').split(',') if u
 def get_random_headers() -> dict:
     headers = {
         "User-Agent": random.choice(USER_AGENTS),
-        "Accept": "application/xml,application/rss+xml",
-        "Connection": "keep-alive",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language": "en-US,en;q=0.5",
+        "Accept-Encoding": "gzip, deflate",
+        "Connection": "keep-alive",
+        "Upgrade-Insecure-Requests": "1",
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-User": "?1",
+        "Referer": "https://www.google.com/",
     }
     return headers
 
@@ -410,13 +417,10 @@ async def main():
     start_time = time.time()
 
     rss_urls = [
-        
-                'https://www.tmz.com/rss.xml',
-                'https://www.arabnews.com/rss.xml',
-    
-        
-    ]
 
+        'https://www.securityweek.com/feed/',
+
+]
 
     semaphore = asyncio.Semaphore(10)  # Limit concurrency to 5 requests at a time
 

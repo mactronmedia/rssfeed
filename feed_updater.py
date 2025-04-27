@@ -310,7 +310,7 @@ class RSSParser:
 # --------------------------
 
 async def main():
-    semaphore = asyncio.Semaphore(20)  # Limit concurrent requests
+    semaphore = asyncio.Semaphore(10)  # Limit concurrent requests
     async with aiohttp.ClientSession() as session:
         feeds = await Database.get_all_feeds()
         tasks = [RSSParser.process_feed(feed, session, semaphore) for feed in feeds]
